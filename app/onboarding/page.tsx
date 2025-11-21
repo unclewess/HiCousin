@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import { createFamily, joinFamily } from '../actions';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function OnboardingPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const inviteCode = searchParams.get('code');
+
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -105,6 +108,7 @@ export default function OnboardingPage() {
                                         name="code"
                                         type="text"
                                         required
+                                        defaultValue={inviteCode || ''}
                                         className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                         placeholder="e.g. ABC123"
                                     />

@@ -1,7 +1,15 @@
-import { neon } from '@neondatabase/serverless';
+import { PrismaClient } from '@prisma/client';
 
-if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL is not defined');
+const prismaClientSingleton = () => {
+    return new PrismaClient();
+};
+
+declare global {
+    var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
-export const sql = neon(process.env.DATABASE_URL);
+const prisma = globalThis.prisma ?? prismaClientSingleton();
+
+export default prisma;
+
+if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
