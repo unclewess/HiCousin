@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  clerkId       String    @unique @map("clerk_id")
+  email         String
+  fullName      String?   @map("full_name")
+  phoneNumber   String?   @map("phone_number")
+  avatarUrl     String?   @map("avatar_url")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  createdFamilies Family[] @relation("CreatedBy")
+  memberships     FamilyMember[]
+  contributions   Contribution[]
+  streaks         Streak[]
+
+  @@map("users")
+}
+
+model Family {
+  id                      String    @id @default(uuid())
+  name                    String
+  code                    String    @unique
+  createdBy               String?   @map("created_by")
+  baseShareValue          Decimal   @default(100.00) @map("base_share_value") @db.Decimal(10, 2)
+  onTimeBonusPercent      Decimal   @default(2.00) @map("on_time_bonus_percent") @db.Decimal(5, 2)
+  streakBonusPercent      Decimal   @default(5.00) @map("streak_bonus_percent") @db.Decimal(5, 2)
+  contributionDeadlineDay Int       @default(5) @map("contribution_deadline_day")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  creator       User?          @relation("CreatedBy", fields: [createdBy], references: [id])
+  members       FamilyMember[]
+  contributions Contribution[]
+  monthlyTargets MonthlyTarget[]
+
+  @@map("families")
+}
+
+model FamilyMember {
+  id        String   @id @default(uuid())
+  familyId  String   @map("family_id")
+  userId    String   @map("user_id")
+  role      String   @default("MEMBER")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+  status    String   @default("ACTIVE")
+
+  family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, userId])
+  @@map("family_members")
+}
+
+model Contribution {
+  id                String   @id @default(uuid())
+  familyId          String   @map("family_id")
+  userId            String   @map("user_id")
+  amount            Decimal  @db.Decimal(10, 2)
+  shares            Decimal  @db.Decimal(10, 2)
+  contributionMonth DateTime @map("contribution_month") @db.Date // First day of month
+  paidAt            DateTime? @map("paid_at")
+  status            String   @default("PENDING")
+  notes             String?
+  verifiedBy        String?  @map("verified_by")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("contributions")
+}
+
+model MonthlyTarget {
+  id           String   @id @default(uuid())
+  familyId     String   @map("family_id")
+  year         Int
+  month        Int
+  targetAmount Decimal  @map("target_amount") @db.Decimal(10, 2)
+
+  family       Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, year, month])
+  @@map("monthly_targets")
+}
+
+model Streak {
+  id                    String   @id @default(uuid())
+  userId                String   @map("user_id")
+  currentStreak         Int      @default(0) @map("current_streak")
+  longestStreak         Int      @default(0) @map("longest_streak")
+  lastContributionMonth DateTime? @map("last_contribution_month") @db.Date
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@map("streaks")
+}
