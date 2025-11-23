@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { createFamily, joinFamily } from '../actions';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function OnboardingPage() {
+function OnboardingContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const inviteCode = searchParams.get('code');
@@ -19,8 +19,8 @@ export default function OnboardingPage() {
         if (res?.error) {
             setError(res.error);
             setLoading(false);
-        } else {
-            router.push('/'); // Redirect to dashboard
+        } else if (res?.familyId) {
+            router.push(`/dashboard/${res.familyId}`);
         }
     }
 
@@ -31,8 +31,8 @@ export default function OnboardingPage() {
         if (res?.error) {
             setError(res.error);
             setLoading(false);
-        } else {
-            router.push('/'); // Redirect to dashboard
+        } else if (res?.familyId) {
+            router.push(`/dashboard/${res.familyId}`);
         }
     }
 
@@ -127,5 +127,13 @@ export default function OnboardingPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function OnboardingPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <OnboardingContent />
+        </Suspense>
     );
 }
