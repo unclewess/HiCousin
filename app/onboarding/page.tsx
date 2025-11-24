@@ -37,31 +37,31 @@ function OnboardingContent() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-            <div className="max-w-md w-full space-y-8">
+        <div className="min-h-screen flex items-center justify-center bg-gray-light p-4">
+            <div className="w-full max-w-lg space-y-8">
                 <div className="text-center">
-                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+                    <h2 className="mt-6 text-3xl font-bold text-gray-dark font-fun">
                         Welcome to hiCousins
                     </h2>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-gray-mid">
                         Get started by creating or joining a family group.
                     </p>
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative" role="alert">
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-soft relative" role="alert">
                         <span className="block sm:inline">{error}</span>
                     </div>
                 )}
 
-                <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 space-y-6">
+                <div className="bg-white py-8 px-6 shadow-medium rounded-rounded space-y-8">
 
                     {/* Create Family Section */}
                     <div>
-                        <h3 className="text-lg leading-6 font-medium text-gray-900">Create a Family</h3>
+                        <h3 className="text-lg leading-6 font-bold text-gray-dark">Create a Family</h3>
                         <form action={handleCreate} className="mt-4 space-y-4">
                             <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="name" className="block text-sm font-medium text-gray-dark">
                                     Family Name
                                 </label>
                                 <div className="mt-1">
@@ -70,7 +70,7 @@ function OnboardingContent() {
                                         name="name"
                                         type="text"
                                         required
-                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        className="appearance-none block w-full px-3 py-2 border border-gray-mid/30 rounded-soft shadow-sm placeholder-gray-mid focus:outline-none focus:ring-cousin-purple focus:border-cousin-purple sm:text-sm"
                                         placeholder="e.g. Smith Cousins"
                                     />
                                 </div>
@@ -78,7 +78,7 @@ function OnboardingContent() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-soft shadow-sm text-sm font-bold text-white bg-cousin-purple hover:bg-cousin-purple/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cousin-purple disabled:opacity-50 transition-colors"
                             >
                                 {loading ? 'Creating...' : 'Create Family'}
                             </button>
@@ -87,19 +87,19 @@ function OnboardingContent() {
 
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300" />
+                            <div className="w-full border-t border-gray-mid/20" />
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-white text-gray-500">Or</span>
+                            <span className="px-2 bg-white text-gray-mid font-medium">Or</span>
                         </div>
                     </div>
 
                     {/* Join Family Section */}
                     <div>
-                        <h3 className="text-lg leading-6 font-medium text-gray-900">Join a Family</h3>
+                        <h3 className="text-lg leading-6 font-bold text-gray-dark">Join a Family</h3>
                         <form action={handleJoin} className="mt-4 space-y-4">
                             <div>
-                                <label htmlFor="code" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="code" className="block text-sm font-medium text-gray-dark">
                                     Invite Code
                                 </label>
                                 <div className="mt-1">
@@ -109,7 +109,7 @@ function OnboardingContent() {
                                         type="text"
                                         required
                                         defaultValue={inviteCode || ''}
-                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        className="appearance-none block w-full px-3 py-2 border border-gray-mid/30 rounded-soft shadow-sm placeholder-gray-mid focus:outline-none focus:ring-cousin-green focus:border-cousin-green sm:text-sm"
                                         placeholder="e.g. ABC123"
                                     />
                                 </div>
@@ -117,7 +117,7 @@ function OnboardingContent() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-soft shadow-sm text-sm font-bold text-white bg-cousin-green hover:bg-cousin-green/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cousin-green disabled:opacity-50 transition-colors"
                             >
                                 {loading ? 'Joining...' : 'Join Family'}
                             </button>

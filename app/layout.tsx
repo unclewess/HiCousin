@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Nunito, Baloo_2 } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
@@ -8,9 +8,14 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const outfit = Outfit({
+const nunito = Nunito({
   subsets: ["latin"],
-  variable: "--font-outfit",
+  variable: "--font-nunito",
+});
+
+const baloo = Baloo_2({
+  subsets: ["latin"],
+  variable: "--font-baloo",
 });
 
 export const metadata: Metadata = {
@@ -27,7 +32,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${inter.variable} ${outfit.variable} antialiased font-sans`}
+          className={`${inter.variable} ${nunito.variable} ${baloo.variable} antialiased font-sans bg-gray-light text-gray-dark`}
         >
           {children}
         </body>

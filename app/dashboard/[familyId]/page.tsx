@@ -9,7 +9,8 @@ import { TreasurerPayment } from "@/components/Admin/TreasurerPayment";
 import { TargetManager } from "@/components/Admin/TargetManager";
 import { CampaignManager } from "@/components/Admin/CampaignManager";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 
 import { ActiveCampaignsList } from "@/components/Dashboard/ActiveCampaignsList";
 
@@ -45,20 +46,20 @@ export default async function DashboardPage({ params }: PageProps) {
     }));
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 pb-20">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 bg-white p-6 rounded-rounded shadow-soft-drop">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight">{family.name}</h2>
-                    <p className="text-muted-foreground">Monthly Contribution Dashboard</p>
+                    <h2 className="text-3xl font-bold tracking-tight text-cousin-purple font-fun">{family.name}</h2>
+                    <p className="text-gray-mid font-medium">Monthly Contribution Dashboard</p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3">
                     <Link href={`/dashboard/${family.id}/reports`}>
-                        <Button variant="outline">View Reports</Button>
+                        <Button variant="secondary">View Reports</Button>
                     </Link>
                     {currentUserRole === 'PRESIDENT' && (
                         <Link href={`/dashboard/${family.id}/settings`}>
-                            <Button variant="outline">Settings</Button>
+                            <Button variant="secondary">Settings</Button>
                         </Link>
                     )}
                     <InviteLink code={family.code} />
@@ -73,7 +74,7 @@ export default async function DashboardPage({ params }: PageProps) {
 
             {/* Admin Section */}
             {(currentUserRole === 'PRESIDENT' || currentUserRole === 'TREASURER') && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {currentUserRole === 'PRESIDENT' && (
                         <>
                             <RoleManager
@@ -83,7 +84,7 @@ export default async function DashboardPage({ params }: PageProps) {
                             />
                         </>
                     )}
-                    <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <TreasurerPayment
                             familyId={family.id}
                             members={allMembers}
@@ -111,12 +112,14 @@ export default async function DashboardPage({ params }: PageProps) {
                 <div className="space-y-8">
                     <GhostTown ghosts={ghosts} />
 
-                    <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-                        <h3 className="font-semibold leading-none tracking-tight mb-4">My Role</h3>
-                        <p className="text-sm text-muted-foreground">
-                            You are a <span className="font-medium text-foreground">{currentUserRole}</span> of this family.
-                        </p>
-                    </div>
+                    <Card>
+                        <div className="p-6">
+                            <h3 className="font-semibold leading-none tracking-tight mb-4 text-cousin-blue">My Role</h3>
+                            <p className="text-sm text-gray-mid">
+                                You are a <span className="font-bold text-gray-dark uppercase">{currentUserRole}</span> of this family.
+                            </p>
+                        </div>
+                    </Card>
                 </div>
             </div>
         </div>

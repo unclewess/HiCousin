@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 
 interface ProgressSectionProps {
     totalCollected: number;
@@ -7,28 +7,26 @@ interface ProgressSectionProps {
 }
 
 export function ProgressSection({ totalCollected, targetAmount }: ProgressSectionProps) {
-    const percentage = Math.min(100, (totalCollected / targetAmount) * 100);
+    const percentage = targetAmount > 0 ? Math.min(100, (totalCollected / targetAmount) * 100) : 0;
 
     return (
-        <Card>
+        <Card className="overflow-visible mt-8">
             <CardHeader>
-                <CardTitle>Monthly Goal</CardTitle>
+                <CardTitle className="text-2xl font-bold text-cousin-purple font-fun">Monthly Goal</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                        <span>Collected: ${totalCollected.toLocaleString()}</span>
-                        {targetAmount > 0 && <span>Target: ${targetAmount.toLocaleString()}</span>}
+                {targetAmount > 0 ? (
+                    <div className="pt-4 pb-2">
+                        <ProgressBar
+                            progress={percentage}
+                            targetAmount={targetAmount}
+                            currentAmount={totalCollected}
+                            showMascot={true}
+                        />
                     </div>
-                    {targetAmount > 0 ? (
-                        <>
-                            <Progress value={percentage} className="h-4" />
-                            <p className="text-xs text-muted-foreground text-right">{percentage.toFixed(1)}% Funded</p>
-                        </>
-                    ) : (
-                        <p className="text-sm text-muted-foreground italic">No monthly goal set.</p>
-                    )}
-                </div>
+                ) : (
+                    <p className="text-sm text-gray-mid italic">No monthly goal set.</p>
+                )}
             </CardContent>
         </Card>
     );
