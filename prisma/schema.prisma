@@ -41,6 +41,7 @@ model Family {
   members       FamilyMember[]
   contributions Contribution[]
   monthlyTargets MonthlyTarget[]
+  campaigns     Campaign[]
 
   @@map("families")
 }
@@ -55,6 +56,7 @@ model FamilyMember {
 
   family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaignParticipations CampaignParticipant[]
 
   @@unique([familyId, userId])
   @@map("family_members")
@@ -64,6 +66,7 @@ model Contribution {
   id                String   @id @default(uuid())
   familyId          String   @map("family_id")
   userId            String   @map("user_id")
+  campaignId        String?  @map("campaign_id")
   amount            Decimal  @db.Decimal(10, 2)
   shares            Decimal  @db.Decimal(10, 2)
   contributionMonth DateTime @map("contribution_month") @db.Date // First day of month
@@ -75,6 +78,7 @@ model Contribution {
 
   family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign  Campaign? @relation(fields: [campaignId], references: [id])
 
   @@map("contributions")
 }
@@ -103,4 +107,37 @@ model Streak {
 
   @@unique([userId])
   @@map("streaks")
+}
+
+model Campaign {
+  id              String   @id @default(uuid())
+  familyId        String   @map("family_id")
+  name            String
+  description     String?
+  targetAmount    Decimal? @map("target_amount") @db.Decimal(10, 2)
+  minContribution Decimal? @map("min_contribution") @db.Decimal(10, 2)
+  deadline        DateTime?
+  status          String   @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
+  type            String   @default("ADHOC") // MONTHLY, ADHOC
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  family        Family                @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  participants  CampaignParticipant[]
+  contributions Contribution[]
+
+  @@map("campaigns")
+}
+
+model CampaignParticipant {
+  id             String   @id @default(uuid())
+  campaignId     String   @map("campaign_id")
+  familyMemberId String   @map("family_member_id")
+  joinedAt       DateTime @default(now()) @map("joined_at")
+
+  campaign     Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  familyMember FamilyMember @relation(fields: [familyMemberId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, familyMemberId])
+  @@map("campaign_participants")
 }
