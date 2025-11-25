@@ -1,6 +1,7 @@
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { Button } from "@/components/ui/Button";
 
 export default function DashboardLayout({
     children,
@@ -21,7 +22,11 @@ export default function DashboardLayout({
                             </div>
                         </div>
                         <div className="flex items-center space-x-4">
-                            {/* Desktop Nav Links could go here */}
+                            <Link href="/families">
+                                <Button variant="secondary" size="sm">
+                                    Switch Family
+                                </Button>
+                            </Link>
                             <UserButton showName />
                         </div>
                     </div>
@@ -34,7 +39,12 @@ export default function DashboardLayout({
                     <Link href="/dashboard" className="text-xl font-bold text-cousin-purple font-fun">
                         hiCousins
                     </Link>
-                    <UserButton />
+                    <div className="flex items-center gap-2">
+                        <Link href="/families" className="text-sm text-gray-mid font-medium hover:text-cousin-purple">
+                            Switch
+                        </Link>
+                        <UserButton />
+                    </div>
                 </div>
             </nav>
 

@@ -43,7 +43,7 @@ export function Hero() {
                         </SignedOut>
 
                         <SignedIn>
-                            <Link href="/dashboard">
+                            <Link href="/families">
                                 <Button variant="primary" className="w-full sm:w-auto text-lg py-6 px-8 rounded-rounded shadow-medium">
                                     Go to Dashboard
                                     <ArrowRight className="ml-2" />
