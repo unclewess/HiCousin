@@ -52,7 +52,7 @@ export function FundSettingsDialog({ familyId, currentTarget, currentMin }: Fund
                     Manage Fund
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white text-gray-dark">
                 <DialogHeader>
                     <DialogTitle>General Fund Settings</DialogTitle>
                     <DialogDescription>

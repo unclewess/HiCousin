@@ -479,6 +479,18 @@ export async function getFamilyCampaigns(familyId: string) {
         });
         if (!member) return [];
 
+        // 1. Auto-archive expired campaigns
+        const now = new Date();
+        await prisma.campaign.updateMany({
+            where: {
+                familyId,
+                status: 'ACTIVE',
+                deadline: { lt: now }
+            },
+            data: { status: 'ARCHIVED' }
+        });
+
+        // 2. Fetch active campaigns
         const campaigns = await prisma.campaign.findMany({
             where: {
                 familyId,
@@ -495,6 +507,72 @@ export async function getFamilyCampaigns(familyId: string) {
     } catch (error) {
         console.error("Error fetching campaigns:", error);
         return [];
+    }
+}
+
+export async function getArchivedCampaigns(familyId: string) {
+    const { userId } = await auth();
+    if (!userId) return {};
+
+    try {
+        const campaigns = await prisma.campaign.findMany({
+            where: {
+                familyId,
+                status: 'ARCHIVED'
+            },
+            orderBy: { deadline: 'desc' } // Order by deadline (most recent first)
+        });
+
+        // Group by Year -> Month
+        const grouped: Record<number, Record<string, any[]>> = {};
+
+        campaigns.forEach(c => {
+            const date = c.deadline || c.updatedAt; // Use deadline, fallback to update time
+            const year = date.getFullYear();
+            const month = date.toLocaleString('default', { month: 'long' });
+
+            if (!grouped[year]) grouped[year] = {};
+            if (!grouped[year][month]) grouped[year][month] = [];
+
+            grouped[year][month].push({
+                ...c,
+                targetAmount: c.targetAmount ? Number(c.targetAmount) : null,
+                minContribution: c.minContribution ? Number(c.minContribution) : null
+            });
+        });
+
+        return grouped;
+    } catch (error) {
+        console.error("Error fetching archived campaigns:", error);
+        return {};
+    }
+}
+
+export async function toggleCampaignStatus(familyId: string, campaignId: string, newStatus: 'ACTIVE' | 'ARCHIVED') {
+    const { userId } = await auth();
+    if (!userId) return { error: "Unauthorized" };
+
+    try {
+        const requester = await prisma.familyMember.findFirst({
+            where: {
+                familyId,
+                user: { clerkId: userId },
+                role: { in: ['PRESIDENT', 'TREASURER'] }
+            }
+        });
+
+        if (!requester) return { error: "Insufficient permissions" };
+
+        await prisma.campaign.update({
+            where: { id: campaignId, familyId },
+            data: { status: newStatus }
+        });
+
+        revalidatePath(`/dashboard/${familyId}`);
+        return { success: true };
+    } catch (error) {
+        console.error("Error toggling campaign status:", error);
+        return { error: "Failed to update campaign status" };
     }
 }
 

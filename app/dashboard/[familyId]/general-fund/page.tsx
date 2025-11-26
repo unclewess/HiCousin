@@ -9,7 +9,7 @@ import { YearSelect } from "@/components/Dashboard/YearSelect";
 import { ContributionForm } from "@/components/Dashboard/ContributionForm";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { Trophy } from "lucide-react";
+import { Trophy, Archive, ArrowLeft } from "lucide-react";
 
 interface PageProps {
     params: Promise<{ familyId: string }>;
@@ -131,15 +131,27 @@ export default async function GeneralFundPage({ params, searchParams }: PageProp
     return (
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-gray-dark font-fun">General Fund / Monthly Dues</h2>
-                    <p className="text-gray-mid">Tracking monthly contributions for {selectedYear}.</p>
+                <div className="flex items-center gap-4">
+                    <Link href={`/dashboard/${familyId}`}>
+                        <Button variant="ghost" size="icon">
+                            <ArrowLeft size={24} />
+                        </Button>
+                    </Link>
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight text-gray-dark font-fun">General Fund / Monthly Dues</h2>
+                        <p className="text-gray-mid">Tracking monthly contributions for {selectedYear}.</p>
+                    </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-4">
                     <YearSelect years={years} currentYear={selectedYear} />
                     <Link href={`/dashboard/${familyId}/leaderboard`}>
                         <Button variant="secondary" leftIcon={<Trophy size={16} />}>
                             Leaderboard
+                        </Button>
+                    </Link>
+                    <Link href={`/dashboard/${familyId}/history`}>
+                        <Button variant="outline" leftIcon={<Archive size={16} />}>
+                            Past Campaigns
                         </Button>
                     </Link>
                     {canManageFunds && <ContributionForm familyId={familyId} />}

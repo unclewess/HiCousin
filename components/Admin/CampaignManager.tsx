@@ -104,7 +104,7 @@ export function CampaignManager({ familyId, members }: CampaignManagerProps) {
                     <span className="font-semibold">Create New Campaign</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white text-gray-dark">
                 <DialogHeader>
                     <DialogTitle>Create New Campaign</DialogTitle>
                     <DialogDescription>

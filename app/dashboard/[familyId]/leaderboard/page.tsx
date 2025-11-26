@@ -2,7 +2,9 @@ import { getUserFamily } from "@/app/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import prisma from "@/lib/db";
-import { Trophy, Medal, Award } from "lucide-react";
+import { Trophy, Medal, Award, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 
 interface PageProps {
     params: Promise<{ familyId: string }>;
@@ -45,13 +47,18 @@ export default async function LeaderboardPage({ params }: PageProps) {
 
     return (
         <div className="space-y-8">
-            <div className="text-center space-y-4">
-                <h1 className="text-4xl font-bold font-fun text-gray-dark">
-                    🏆 Family Leaderboard
-                </h1>
-                <p className="text-xl text-gray-mid">
-                    Who's carrying the family this month? 👀
-                </p>
+            <div className="flex items-center gap-4">
+                <Link href={`/dashboard/${familyId}`}>
+                    <Button variant="ghost" size="icon">
+                        <ArrowLeft size={24} />
+                    </Button>
+                </Link>
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-dark font-fun flex items-center gap-2">
+                        <Trophy className="text-cousin-yellow" /> Leaderboard
+                    </h2>
+                    <p className="text-gray-mid">Top contributors this month.</p>
+                </div>
             </div>
 
             {/* Top 3 Podium */}

@@ -2,8 +2,8 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'primary' | 'secondary' | 'danger' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
@@ -18,12 +18,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       primary: "bg-cousin-green text-white hover:bg-[#3db07a] shadow-soft-drop focus:ring-cousin-green",
       secondary: "bg-gray-light text-gray-dark hover:bg-gray-200 focus:ring-gray-mid",
       danger: "bg-error text-white hover:bg-red-600 focus:ring-error",
+      outline: "bg-transparent border-2 border-gray-light text-gray-dark hover:bg-gray-50 focus:ring-gray-mid",
+      ghost: "bg-transparent text-gray-dark hover:bg-gray-100 focus:ring-gray-mid",
     };
 
     const sizes = {
       sm: "px-3 py-1.5 text-sm rounded-pill",
       md: "px-6 py-3 text-base rounded-pill",
       lg: "px-8 py-4 text-lg rounded-pill",
+      icon: "p-2 rounded-full",
     };
 
     return (
