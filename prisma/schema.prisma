@@ -34,6 +34,7 @@ model Family {
   onTimeBonusPercent      Decimal   @default(2.00) @map("on_time_bonus_percent") @db.Decimal(5, 2)
   streakBonusPercent      Decimal   @default(5.00) @map("streak_bonus_percent") @db.Decimal(5, 2)
   contributionDeadlineDay Int       @default(5) @map("contribution_deadline_day")
+  contributionFrequency   String    @default("MONTHLY") @map("contribution_frequency")
   createdAt               DateTime  @default(now()) @map("created_at")
   updatedAt               DateTime  @default(now()) @updatedAt @map("updated_at")
 
@@ -42,6 +43,7 @@ model Family {
   contributions Contribution[]
   monthlyTargets MonthlyTarget[]
   campaigns     Campaign[]
+  expenses      Expense[]
 
   @@map("families")
 }
@@ -69,6 +71,9 @@ model Contribution {
   campaignId        String?  @map("campaign_id")
   amount            Decimal  @db.Decimal(10, 2)
   shares            Decimal  @db.Decimal(10, 2)
+  baseShares        Decimal  @default(0) @map("base_shares") @db.Decimal(10, 2)
+  onTimeBonus       Decimal  @default(0) @map("on_time_bonus") @db.Decimal(10, 2)
+  streakBonus       Decimal  @default(0) @map("streak_bonus") @db.Decimal(10, 2)
   contributionMonth DateTime @map("contribution_month") @db.Date // First day of month
   paidAt            DateTime? @map("paid_at")
   status            String   @default("PENDING")
@@ -121,10 +126,12 @@ model Campaign {
   type            String   @default("ADHOC") // MONTHLY, ADHOC
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+  reconciliationNotes String? @map("reconciliation_notes")
 
   family        Family                @relation(fields: [familyId], references: [id], onDelete: Cascade)
   participants  CampaignParticipant[]
   contributions Contribution[]
+  expenses      Expense[]
 
   @@map("campaigns")
 }
@@ -140,4 +147,21 @@ model CampaignParticipant {
 
   @@unique([campaignId, familyMemberId])
   @@map("campaign_participants")
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  familyId    String   @map("family_id")
+  campaignId  String?  @map("campaign_id")
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+  date        DateTime @db.Date
+  category    String?
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  family   Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  campaign Campaign? @relation(fields: [campaignId], references: [id])
+
+  @@map("expenses")
 }

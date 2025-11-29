@@ -520,6 +520,14 @@ export async function getArchivedCampaigns(familyId: string) {
                 familyId,
                 status: 'ARCHIVED'
             },
+            include: {
+                contributions: {
+                    include: { user: true }
+                },
+                expenses: {
+                    orderBy: { date: 'desc' }
+                }
+            },
             orderBy: { deadline: 'desc' } // Order by deadline (most recent first)
         });
 
@@ -537,7 +545,16 @@ export async function getArchivedCampaigns(familyId: string) {
             grouped[year][month].push({
                 ...c,
                 targetAmount: c.targetAmount ? Number(c.targetAmount) : null,
-                minContribution: c.minContribution ? Number(c.minContribution) : null
+                minContribution: c.minContribution ? Number(c.minContribution) : null,
+                contributions: c.contributions.map((contrib: any) => ({
+                    ...contrib,
+                    amount: Number(contrib.amount),
+                    shares: Number(contrib.shares)
+                })),
+                expenses: c.expenses.map((exp: any) => ({
+                    ...exp,
+                    amount: Number(exp.amount)
+                }))
             });
         });
 
@@ -730,50 +747,7 @@ export async function regenerateInviteCode(familyId: string) {
     }
 }
 
-export async function getCampaignDetails(familyId: string, campaignId: string) {
-    const { userId } = await auth();
-    if (!userId) return null;
 
-    try {
-        const member = await prisma.familyMember.findFirst({
-            where: { familyId, user: { clerkId: userId } }
-        });
-        if (!member) return null;
-
-        const campaign = await prisma.campaign.findUnique({
-            where: { id: campaignId, familyId },
-            include: {
-                contributions: {
-                    include: { user: true },
-                    orderBy: { paidAt: 'desc' }
-                },
-                participants: {
-                    include: { familyMember: { include: { user: true } } }
-                }
-            }
-        });
-
-        if (!campaign) return null;
-
-        return {
-            ...campaign,
-            targetAmount: campaign.targetAmount ? Number(campaign.targetAmount) : null,
-            minContribution: campaign.minContribution ? Number(campaign.minContribution) : null,
-            contributions: campaign.contributions.map(c => ({
-                ...c,
-                amount: Number(c.amount)
-            })),
-            participants: campaign.participants.map(p => ({
-                id: p.familyMember.user.id,
-                fullName: p.familyMember.user.fullName,
-                avatarUrl: p.familyMember.user.avatarUrl
-            }))
-        };
-    } catch (error) {
-        console.error("Error fetching campaign details:", error);
-        return null;
-    }
-}
 
 export async function assignRole(familyId: string, targetUserId: string, newRole: string) {
     const { userId } = await auth();
@@ -966,5 +940,321 @@ export async function updateFundSettings(familyId: string, targetAmount: number,
     } catch (error) {
         console.error("Update settings error:", error);
         return { error: "Failed to update settings" };
+    }
+}
+
+// Expense & Reconciliation Actions
+
+export async function addExpense(data: {
+    description: string;
+    amount: number;
+    date: Date;
+    category?: string;
+    campaignId?: string;
+    familyId: string;
+}) {
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: "Unauthorized" };
+
+    try {
+        const expense = await prisma.expense.create({
+            data: {
+                description: data.description,
+                amount: data.amount,
+                date: data.date,
+                category: data.category,
+                campaignId: data.campaignId,
+                familyId: data.familyId,
+                createdBy: userId
+            }
+        });
+
+        revalidatePath(`/dashboard/${data.familyId}`);
+        revalidatePath(`/dashboard/${data.familyId}/history`);
+        revalidatePath(`/dashboard/${data.familyId}/general-fund`);
+
+        return { success: true, expense };
+    } catch (error) {
+        console.error("Error adding expense:", error);
+        return { success: false, error: "Failed to add expense" };
+    }
+}
+
+export async function updateCampaignReconciliation(campaignId: string, notes: string, familyId: string) {
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: "Unauthorized" };
+
+    try {
+        await prisma.campaign.update({
+            where: { id: campaignId },
+            data: { reconciliationNotes: notes }
+        });
+
+        revalidatePath(`/dashboard/${familyId}/history`);
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating reconciliation notes:", error);
+        return { success: false, error: "Failed to update notes" };
+    }
+}
+
+export async function getCampaignDetails(familyId: string, campaignId: string) {
+    const { userId } = await auth();
+    if (!userId) return null;
+
+    try {
+        const campaign = await prisma.campaign.findUnique({
+            where: { id: campaignId, familyId },
+            include: {
+                contributions: {
+                    where: { status: 'PAID' },
+                    include: { user: true }
+                },
+                expenses: {
+                    orderBy: { date: 'desc' }
+                },
+                participants: {
+                    include: { familyMember: { include: { user: true } } }
+                }
+            }
+        });
+
+        if (!campaign) return null;
+
+        const totalCollected = campaign.contributions.reduce((sum, c) => sum + Number(c.amount), 0);
+        const totalExpenses = campaign.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+
+        return {
+            ...campaign,
+            targetAmount: campaign.targetAmount ? Number(campaign.targetAmount) : null,
+            minContribution: campaign.minContribution ? Number(campaign.minContribution) : null,
+            totalCollected,
+            totalExpenses,
+            balance: totalCollected - totalExpenses,
+            contributions: campaign.contributions.map((c: any) => ({
+                ...c,
+                amount: Number(c.amount)
+            })),
+            participants: campaign.participants.map((p: any) => ({
+                id: p.familyMember.user.id,
+                fullName: p.familyMember.user.fullName,
+                avatarUrl: p.familyMember.user.avatarUrl
+            }))
+        };
+    } catch (error) {
+        console.error("Error fetching campaign details:", error);
+        return null;
+    }
+}
+
+export async function getGeneralFundExpenses(familyId: string) {
+    const { userId } = await auth();
+    if (!userId) return [];
+
+    try {
+        const expenses = await prisma.expense.findMany({
+            where: {
+                familyId,
+                campaignId: null // Only general fund expenses
+            },
+            orderBy: { date: 'desc' }
+        });
+
+        return expenses;
+    } catch (error) {
+        console.error("Error fetching general fund expenses:", error);
+        return [];
+    }
+}
+
+// Helper function to calculate bonus shares for a contribution
+async function calculateBonusShares(params: {
+    amount: number;
+    paymentDate: Date;
+    contributionMonth: Date;
+    familyId: string;
+    userId: string;
+}) {
+    const { amount, paymentDate, contributionMonth, familyId, userId } = params;
+
+    // Get family settings
+    const family = await prisma.family.findUnique({ where: { id: familyId } });
+    if (!family) {
+        return { baseShares: 0, onTimeBonus: 0, streakBonus: 0, totalShares: 0 };
+    }
+
+    const baseShareValue = Number(family.baseShareValue);
+    const onTimeBonusPercent = Number(family.onTimeBonusPercent);
+    const streakBonusPercent = Number(family.streakBonusPercent);
+    const deadlineDay = family.contributionDeadlineDay;
+
+    // Calculate base shares
+    const baseShares = amount / baseShareValue;
+
+    // Calculate on-time bonus
+    const deadline = new Date(contributionMonth.getFullYear(), contributionMonth.getMonth(), deadlineDay);
+    const isOnTime = paymentDate <= deadline;
+    const onTimeBonus = isOnTime ? (baseShares * onTimeBonusPercent) / 100 : 0;
+
+    // Get current streak for streak bonus
+    const streak = await prisma.streak.findUnique({ where: { userId } });
+    const currentStreak = streak?.currentStreak || 0;
+
+    // Streak bonus: 5% per 12 months (cumulative)
+    const streakYears = Math.floor(currentStreak / 12);
+    const streakBonus = streakYears > 0 ? (baseShares * streakBonusPercent * streakYears) / 100 : 0;
+
+    // Total shares
+    const totalShares = baseShares + onTimeBonus + streakBonus;
+
+    return { baseShares, onTimeBonus, streakBonus, totalShares };
+}
+
+interface LeaderboardEntry {
+    userId: string;
+    fullName: string;
+    avatarUrl: string | null;
+    totalShares: number;
+    totalAmount: number;
+    currentStreak: number;
+    rank: number;
+    lastContributionStatus: 'early' | 'on-time' | 'late' | 'none';
+    joinedAt: Date;
+}
+
+export async function getLeaderboardData(
+    familyId: string,
+    startDate?: Date,
+    endDate?: Date,
+    includeInactive: boolean = false
+) {
+    const { userId } = await auth();
+    if (!userId) return null;
+
+    try {
+        // Get family settings
+        const family = await prisma.family.findUnique({ where: { id: familyId } });
+        if (!family) return null;
+
+        const deadlineDay = family.contributionDeadlineDay;
+
+        // Default to current month if no date range provided
+        const now = new Date();
+        const start = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
+        const end = endDate || new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+        // Get all active members
+        const members = await prisma.familyMember.findMany({
+            where: { familyId, status: 'ACTIVE' },
+            include: {
+                user: {
+                    include: {
+                        contributions: {
+                            where: {
+                                familyId,
+                                campaignId: null, // General fund only
+                                contributionMonth: {
+                                    gte: start,
+                                    lte: end
+                                },
+                                status: 'PAID'
+                            }
+                        },
+                        streaks: true
+                    }
+                }
+            }
+        });
+
+        const leaderboard: LeaderboardEntry[] = [];
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        for (const member of members) {
+            const contributions = member.user.contributions;
+            const streak = member.user.streaks[0];
+
+            // Calculate totals
+            const totalShares = contributions.reduce((sum: number, c: any) => sum + Number(c.shares), 0);
+            const totalAmount = contributions.reduce((sum: number, c: any) => sum + Number(c.amount), 0);
+
+            // Determine last contribution status
+            let lastStatus: 'early' | 'on-time' | 'late' | 'none' = 'none';
+            if (contributions.length > 0) {
+                const lastContrib = contributions[contributions.length - 1];
+                const deadline = new Date(
+                    lastContrib.contributionMonth.getFullYear(),
+                    lastContrib.contributionMonth.getMonth(),
+                    deadlineDay
+                );
+
+                if (lastContrib.paidAt) {
+                    if (lastContrib.paidAt < deadline) lastStatus = 'early';
+                    else if (lastContrib.paidAt.getTime() === deadline.getTime()) lastStatus = 'on-time';
+                    else lastStatus = 'late';
+                }
+            }
+
+            // Check if inactive (no contribution in current month)
+            const hasCurrentMonthContribution = contributions.some((c: any) =>
+                c.contributionMonth.getTime() === currentMonthStart.getTime()
+            );
+
+            const entry: LeaderboardEntry = {
+                userId: member.user.id,
+                fullName: member.user.fullName || 'Unknown',
+                avatarUrl: member.user.avatarUrl,
+                totalShares,
+                totalAmount,
+                currentStreak: streak?.currentStreak || 0,
+                rank: 0, // Will be assigned after sorting
+                lastContributionStatus: lastStatus,
+                joinedAt: member.joinedAt
+            };
+
+            if (hasCurrentMonthContribution || includeInactive) {
+                leaderboard.push(entry);
+            }
+        }
+
+        // Sort and assign ranks
+        leaderboard.sort((a, b) => {
+            if (b.totalShares !== a.totalShares) return b.totalShares - a.totalShares;
+            if (b.currentStreak !== a.currentStreak) return b.currentStreak - a.currentStreak;
+            return a.joinedAt.getTime() - b.joinedAt.getTime();
+        });
+
+        leaderboard.forEach((entry, index) => {
+            entry.rank = index + 1;
+        });
+
+        // Separate active and inactive
+        const activeMembers = leaderboard.filter(m => {
+            const hasCurrentContribution = members.find(fm =>
+                fm.user.id === m.userId
+            )?.user.contributions.some((c: any) =>
+                c.contributionMonth.getTime() === currentMonthStart.getTime()
+            );
+            return hasCurrentContribution;
+        });
+
+        const inactiveMembers = leaderboard.filter(m => !activeMembers.includes(m));
+
+        // Calculate aggregate metrics
+        const metrics = {
+            totalShares: leaderboard.reduce((sum, m) => sum + m.totalShares, 0),
+            totalAmount: leaderboard.reduce((sum, m) => sum + m.totalAmount, 0),
+            averageStreak: leaderboard.length > 0
+                ? leaderboard.reduce((sum, m) => sum + m.currentStreak, 0) / leaderboard.length
+                : 0
+        };
+
+        return {
+            activeMembers,
+            inactiveMembers,
+            metrics
+        };
+    } catch (error) {
+        console.error("Error fetching leaderboard data:", error);
+        return null;
     }
 }

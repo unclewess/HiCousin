@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { ArrowLeft, RefreshCw, Archive } from "lucide-react";
 import Link from "next/link";
 import { ReactivateButton } from "@/components/Admin/ReactivateButton";
+import { ReconciliationDialog } from "@/components/Admin/ReconciliationDialog";
 
 interface PageProps {
     params: Promise<{ familyId: string }>;
@@ -21,7 +22,7 @@ export default async function HistoryPage({ params }: PageProps) {
     return (
         <div className="space-y-8">
             <div className="flex items-center gap-4">
-                <Link href={`/dashboard/${familyId}/general-fund`}>
+                <Link href={`/dashboard/${familyId}`}>
                     <Button variant="ghost" size="icon">
                         <ArrowLeft size={24} />
                     </Button>
@@ -81,12 +82,19 @@ export default async function HistoryPage({ params }: PageProps) {
                                                                     {campaign.deadline ? new Date(campaign.deadline).toLocaleDateString() : 'None'}
                                                                 </span>
                                                             </div>
-                                                            {canManage && (
-                                                                <ReactivateButton
+                                                            <div className="flex gap-2 mt-4">
+                                                                <ReconciliationDialog
                                                                     familyId={familyId}
-                                                                    campaignId={campaign.id}
+                                                                    campaign={campaign}
+                                                                    canManage={canManage}
                                                                 />
-                                                            )}
+                                                                {canManage && (
+                                                                    <ReactivateButton
+                                                                        familyId={familyId}
+                                                                        campaignId={campaign.id}
+                                                                    />
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </CardContent>
                                                 </Card>
