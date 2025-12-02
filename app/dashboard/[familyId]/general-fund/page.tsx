@@ -292,7 +292,7 @@ export default async function GeneralFundPage({ params, searchParams }: PageProp
                         <CardContent>
                             <ExpenseManager
                                 familyId={familyId}
-                                expenses={expenses}
+                                expenses={expenses.map(e => ({ ...e, amount: Number(e.amount) }))}
                                 canManage={canManageFunds}
                             />
                         </CardContent>

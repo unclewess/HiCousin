@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { updateFamilyName, regenerateInviteCode } from "@/app/actions";
 import { useRouter } from 'next/navigation';
 
@@ -77,7 +77,7 @@ export function SettingsForm({ family }: SettingsFormProps) {
                             <div className="text-2xl font-mono font-bold tracking-wider bg-muted p-2 rounded">
                                 {code}
                             </div>
-                            <Button variant="destructive" onClick={handleRegenerateCode} disabled={loading}>
+                            <Button variant="danger" onClick={handleRegenerateCode} disabled={loading}>
                                 Regenerate Code
                             </Button>
                         </div>

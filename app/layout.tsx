@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Nunito, Baloo_2 } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -35,6 +36,7 @@ export default function RootLayout({
           className={`${inter.variable} ${nunito.variable} ${baloo.variable} antialiased font-sans bg-gray-light text-gray-dark`}
         >
           {children}
+          <Toaster position="top-right" richColors />
         </body>
       </html>
     </ClerkProvider>

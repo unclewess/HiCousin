@@ -1,0 +1,63 @@
+app/actions/proofs.ts(47,17): error TS2322: Type '{ transactionRef: string; }' is not assignable to type 'ProofOfPaymentWhereUniqueInput'.
+  Type '{ transactionRef: string; }' is not assignable to type '{ id: string; contributionId: string; } & { id?: string | undefined; contributionId?: string | undefined; AND?: ProofOfPaymentWhereInput | ProofOfPaymentWhereInput[] | undefined; ... 26 more ...; auditLogs?: AuditLogListRelationFilter | undefined; }'.
+    Type '{ transactionRef: string; }' is missing the following properties from type '{ id: string; contributionId: string; }': id, contributionId
+components/ProofOfPayment/VerificationQueue.tsx(4,22): error TS1149: File name 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/ui/card.tsx' differs from already included file name 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/ui/Card.tsx' only in casing.
+  The file is in the program because:
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Dashboard/ProgressSection.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Dashboard/MemberList.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Dashboard/GhostTown.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/RoleManager.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/TargetManager.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/page.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Dashboard/ActiveCampaignsList.tsx'
+    Imported via "@/components/ui/card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/ProofOfPayment/VerificationQueue.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/ProofOfPayment/TreasurerVerificationSection.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/campaigns/[campaignId]/page.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/general-fund/page.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/ExpenseManager.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/history/page.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Leaderboard/LeaderboardClient.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/reports/page.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/settings/page.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/SettingsForm.tsx'
+    Imported via '@/components/ui/Card' from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/design-system/page.tsx'
+    Imported via "@/components/ui/Card" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/families/page.tsx'
+    Matched by include pattern '**/*.tsx' in 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/tsconfig.json'
+components/ProofOfPayment/VerificationQueue.tsx(5,24): error TS1149: File name 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/ui/button.tsx' differs from already included file name 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/ui/Button.tsx' only in casing.
+  The file is in the program because:
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Landing/Navbar.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Landing/Hero.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/layout.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Dashboard/DashboardHeader.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Dashboard/NotificationCenter.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/RoleManager.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/TreasurerPayment.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/TargetManager.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/CampaignManager.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/page.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/ProofOfPayment/SubmitProofDialog.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/ProofOfPayment/ProofSubmissionForm.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/ProofOfPayment/MemberSearch.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/ProofOfPayment/DisputeDialog.tsx'
+    Imported via "@/components/ui/button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/ProofOfPayment/VerificationQueue.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/FundSettingsDialog.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Dashboard/ContributionForm.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/ExpenseManager.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/general-fund/page.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/history/page.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/ReactivateButton.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/ReconciliationDialog.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Leaderboard/LeaderboardClient.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/leaderboard/page.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/reports/page.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Dashboard/DownloadReportButton.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/dashboard/[familyId]/settings/page.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/components/Admin/SettingsForm.tsx'
+    Imported via '@/components/ui/Button' from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/design-system/page.tsx'
+    Imported via "@/components/ui/Button" from file 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/app/families/page.tsx'
+    Matched by include pattern '**/*.tsx' in 'C:/Users/Rowmond/Documents/UncleWess/Dev/HiCousin/tsconfig.json'
+components/ProofOfPayment/VerificationQueue.tsx(205,34): error TS2304: Cannot find name 'X'.
+lib/parser.ts(169,35): error TS18048: 'parsed.amount' is possibly 'undefined'.
+tailwind.config.ts(4,5): error TS2322: Type '["class"]' is not assignable to type 'DarkModeStrategy | undefined'.
+  Type '["class"]' is not assignable to type '["class", string]'.
+    Source has 1 element(s) but target requires 2.

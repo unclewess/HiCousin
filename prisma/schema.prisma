@@ -17,10 +17,13 @@ model User {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  createdFamilies Family[] @relation("CreatedBy")
-  memberships     FamilyMember[]
-  contributions   Contribution[]
-  streaks         Streak[]
+  createdFamilies  Family[]            @relation("CreatedBy")
+  memberships      FamilyMember[]
+  contributions    Contribution[]
+  streaks          Streak[]
+  proofs           ProofOfPayment[]
+  notifications    Notification[]
+  beneficiaryProofs ProofBeneficiary[]
 
   @@map("users")
 }
@@ -44,6 +47,7 @@ model Family {
   monthlyTargets MonthlyTarget[]
   campaigns     Campaign[]
   expenses      Expense[]
+  proofs        ProofOfPayment[]
 
   @@map("families")
 }
@@ -81,9 +85,11 @@ model Contribution {
   verifiedBy        String?  @map("verified_by")
   createdAt         DateTime @default(now()) @map("created_at")
 
-  family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  campaign  Campaign? @relation(fields: [campaignId], references: [id])
+  family      Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign    Campaign?         @relation(fields: [campaignId], references: [id])
+  proof       ProofOfPayment?
+  beneficiary ProofBeneficiary?
 
   @@map("contributions")
 }
@@ -132,6 +138,7 @@ model Campaign {
   participants  CampaignParticipant[]
   contributions Contribution[]
   expenses      Expense[]
+  proofs        ProofOfPayment[]
 
   @@map("campaigns")
 }
@@ -164,4 +171,104 @@ model Expense {
   campaign Campaign? @relation(fields: [campaignId], references: [id])
 
   @@map("expenses")
+}
+
+model ProofOfPayment {
+  id                String    @id @default(uuid())
+  familyId          String    @map("family_id")
+  userId            String    @map("user_id")
+  amount            Decimal   @db.Decimal(10, 2)
+  currency          String    @default("KES")
+  paymentChannel    String    @map("payment_channel") // MPESA, BANK, CASH
+  transactionRef    String?   @map("transaction_ref") // Optional for proofless claims
+  paymentDate       DateTime  @map("payment_date")
+  
+  // Message-based proof fields
+  rawMessage        String?   @map("raw_message") @db.Text // Encrypted SMS/WhatsApp text
+  messageHash       String?   @map("message_hash") // SHA-256 for duplicate detection
+  parserConfidence  Decimal?  @map("parser_confidence") @db.Decimal(3, 2) // 0.00-1.00
+  
+  // Image-based proof (now optional)
+  imageUrl          String?   @map("image_url")
+  
+  // Fraud detection
+  fraudScore        Int?      @default(0) @map("fraud_score") // 0-100
+  isProofless       Boolean   @default(false) @map("is_proofless") // Manual entry without proof
+  
+  // Status and verification
+  status            String    @default("PENDING") // PENDING, APPROVED, REJECTED, DISPUTED, ESCALATED, UNVERIFIED_CLAIM
+  rejectionReason   String?   @map("rejection_reason")
+  verifiedBy        String?   @map("verified_by")
+  verifiedAt        DateTime? @map("verified_at")
+  
+  // Multi-beneficiary support
+  amountAllocated   Decimal?  @map("amount_allocated") @db.Decimal(10, 2) // Total allocated to beneficiaries
+  
+  // Legacy single contribution (deprecated for multi-beneficiary)
+  contributionId    String?   @unique @map("contribution_id")
+  
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  family        Family              @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contribution  Contribution?       @relation(fields: [contributionId], references: [id])
+  beneficiaries ProofBeneficiary[]
+  auditLogs     AuditLog[]
+  campaignId    String?   @map("campaign_id")
+  campaign      Campaign? @relation(fields: [campaignId], references: [id])
+
+  @@index([messageHash])
+  @@index([transactionRef])
+  @@index([status])
+  @@index([familyId, status])
+  @@map("proofs_of_payment")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  type      String   // PROOF_SUBMITTED, PROOF_APPROVED, PROOF_REJECTED
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model ProofBeneficiary {
+  id              String   @id @default(uuid())
+  proofId         String   @map("proof_id")
+  userId          String   @map("user_id")
+  allocatedAmount Decimal  @map("allocated_amount") @db.Decimal(10, 2)
+  contributionId  String?  @unique @map("contribution_id") // Created on approval
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  proof        ProofOfPayment @relation(fields: [proofId], references: [id], onDelete: Cascade)
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contribution Contribution?  @relation(fields: [contributionId], references: [id])
+
+  @@index([proofId])
+  @@index([userId])
+  @@map("proof_beneficiaries")
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  proofId       String   @map("proof_id")
+  action        String   // CREATED, EDITED, APPROVED, REJECTED, DISPUTED, OVERRIDDEN, ESCALATED
+  performedBy   String   @map("performed_by") // User ID
+  previousValue String?  @map("previous_value") @db.Text // JSON snapshot
+  newValue      String?  @map("new_value") @db.Text // JSON snapshot
+  reason        String?  // Optional reason for action
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  proof ProofOfPayment @relation(fields: [proofId], references: [id], onDelete: Cascade)
+
+  @@index([proofId])
+  @@index([performedBy])
+  @@index([action])
+  @@map("audit_logs")
 }

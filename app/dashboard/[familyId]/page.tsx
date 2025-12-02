@@ -14,6 +14,8 @@ import { Card } from "@/components/ui/Card";
 import { Archive } from "lucide-react";
 
 import { ActiveCampaignsList } from "@/components/Dashboard/ActiveCampaignsList";
+import { SubmitProofDialog } from "@/components/ProofOfPayment/SubmitProofDialog";
+import { TreasurerVerificationSection } from "@/components/ProofOfPayment/TreasurerVerificationSection";
 
 interface PageProps {
     params: Promise<{ familyId: string }>;
@@ -70,6 +72,7 @@ export default async function DashboardPage({ params }: PageProps) {
                         </Link>
                     )}
                     <InviteLink code={family.code} />
+                    <SubmitProofDialog familyId={family.id} />
                 </div>
             </div>
 
@@ -82,6 +85,9 @@ export default async function DashboardPage({ params }: PageProps) {
             {/* Admin Section */}
             {(currentUserRole === 'PRESIDENT' || currentUserRole === 'TREASURER') && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="col-span-1 md:col-span-2">
+                        <TreasurerVerificationSection familyId={family.id} />
+                    </div>
                     {currentUserRole === 'PRESIDENT' && (
                         <>
                             <RoleManager

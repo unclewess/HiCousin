@@ -1,7 +1,7 @@
 import { getSettingsData, updateFamilyName, regenerateInviteCode } from "@/app/actions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { redirect } from "next/navigation";
 import { SettingsForm } from "@/components/Admin/SettingsForm";
 import { ArrowLeft } from "lucide-react";
