@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { payContribution } from "@/app/actions";
+import { DollarSign } from 'lucide-react';
 
 interface ContributionFormProps {
     familyId: string;
@@ -36,23 +37,37 @@ export function ContributionForm({ familyId }: ContributionFormProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="w-full sm:w-auto">Make Contribution</Button>
+                <Button variant="primary" leftIcon={<DollarSign size={16} />}>
+                    Make Contribution
+                </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[425px] bg-white rounded-rounded shadow-medium border-none">
                 <DialogHeader>
-                    <DialogTitle>Contribute to Family Fund</DialogTitle>
+                    <DialogTitle className="text-2xl font-fun text-cousin-purple text-center">
+                        Contribute to Family Fund
+                    </DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
+                <div className="space-y-6 py-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Amount ($)</label>
+                        <label className="text-sm font-bold text-gray-dark">Amount ($)</label>
                         <Input
                             type="number"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
+                            className="text-lg font-bold text-center h-12 border-2 border-gray-light focus:border-cousin-green focus:ring-cousin-green/20"
                         />
+                        <p className="text-xs text-gray-mid text-center">
+                            Standard contribution is $100
+                        </p>
                     </div>
-                    <Button onClick={handlePay} disabled={loading} className="w-full">
-                        {loading ? "Processing..." : "Pay Now"}
+                    <Button
+                        onClick={handlePay}
+                        disabled={loading}
+                        className="w-full h-12 text-lg"
+                        variant="primary"
+                        isLoading={loading}
+                    >
+                        Pay Now
                     </Button>
                 </div>
             </DialogContent>

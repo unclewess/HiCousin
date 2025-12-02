@@ -37,8 +37,8 @@ function OnboardingContent() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-light p-4">
-            <div className="w-full max-w-lg space-y-8">
+        <div className="min-h-screen bg-gray-light flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+            <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="text-center">
                     <h2 className="mt-6 text-3xl font-bold text-gray-dark font-fun">
                         Welcome to hiCousins
@@ -47,14 +47,16 @@ function OnboardingContent() {
                         Get started by creating or joining a family group.
                     </p>
                 </div>
+            </div>
 
-                {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-soft relative" role="alert">
-                        <span className="block sm:inline">{error}</span>
-                    </div>
-                )}
+            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+                <div className="bg-white py-8 px-4 shadow-medium rounded-rounded sm:px-10 space-y-6">
 
-                <div className="bg-white py-8 px-6 shadow-medium rounded-rounded space-y-8">
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-soft relative" role="alert">
+                            <span className="block sm:inline">{error}</span>
+                        </div>
+                    )}
 
                     {/* Create Family Section */}
                     <div>

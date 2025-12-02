@@ -2,8 +2,11 @@ import { getReportsData } from "@/app/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { redirect } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 import { DownloadReportButton } from "@/components/Dashboard/DownloadReportButton";
+import { redirect } from "next/navigation";
 
 interface PageProps {
     params: Promise<{ familyId: string }>;
@@ -14,17 +17,24 @@ export default async function ReportsPage({ params }: PageProps) {
     const data = await getReportsData(familyId);
 
     if (!data) {
-        redirect("/families");
+        redirect(`/dashboard/${familyId}`);
     }
 
     const { contributions, memberSummaries, campaignSummaries } = data;
 
     return (
         <div className="space-y-8">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Reports</h2>
-                    <p className="text-muted-foreground">Overview of family contributions and campaigns.</p>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex items-center gap-4">
+                    <Link href={`/dashboard/${familyId}`}>
+                        <Button variant="ghost" size="icon">
+                            <ArrowLeft size={24} />
+                        </Button>
+                    </Link>
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight text-gray-dark font-fun">Family Reports</h2>
+                        <p className="text-gray-mid">Detailed breakdown of all activities.</p>
+                    </div>
                 </div>
                 <DownloadReportButton contributions={contributions} />
             </div>

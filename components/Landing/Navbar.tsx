@@ -42,7 +42,7 @@ export function Navbar() {
                         </SignedOut>
 
                         <SignedIn>
-                            <Link href="/dashboard">
+                            <Link href="/families">
                                 <Button variant="primary" className="rounded-full">
                                     Dashboard
                                 </Button>
@@ -96,7 +96,7 @@ export function Navbar() {
                                 </SignInButton>
                             </SignedOut>
                             <SignedIn>
-                                <Link href="/dashboard" onClick={() => setIsOpen(false)}>
+                                <Link href="/families" onClick={() => setIsOpen(false)}>
                                     <Button variant="primary" className="w-full rounded-xl">
                                         Go to Dashboard
                                     </Button>

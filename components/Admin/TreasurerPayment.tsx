@@ -13,7 +13,21 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { DollarSign } from "lucide-react";
+import { DollarSign, Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 
 interface Member {
     id: string;
@@ -33,6 +47,7 @@ interface TreasurerPaymentProps {
 
 export function TreasurerPayment({ familyId, members, campaigns = [] }: TreasurerPaymentProps) {
     const [open, setOpen] = useState(false);
+    const [openCombobox, setOpenCombobox] = useState(false);
     const [selectedMember, setSelectedMember] = useState<string>("");
     const [selectedCampaign, setSelectedCampaign] = useState<string>("GENERAL");
     const [amount, setAmount] = useState("100");
@@ -78,7 +93,7 @@ export function TreasurerPayment({ familyId, members, campaigns = [] }: Treasure
                     <span className="font-semibold">Record Payment</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white text-gray-dark overflow-visible">
                 <DialogHeader>
                     <DialogTitle>Record Manual Payment</DialogTitle>
                     <DialogDescription>
@@ -86,20 +101,51 @@ export function TreasurerPayment({ familyId, members, campaigns = [] }: Treasure
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                    <div className="space-y-2">
+                    <div className="space-y-2 flex flex-col">
                         <label className="text-sm font-medium">Member</label>
-                        <Select value={selectedMember} onValueChange={setSelectedMember}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select member" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {members.map((m) => (
-                                    <SelectItem key={m.id} value={m.id}>
-                                        {m.fullName}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={openCombobox}
+                                    className="w-full justify-between"
+                                >
+                                    {selectedMember
+                                        ? members.find((member) => member.id === selectedMember)?.fullName
+                                        : "Select member..."}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[400px] p-0 bg-white">
+                                <Command>
+                                    <CommandInput placeholder="Search member..." />
+                                    <CommandList>
+                                        <CommandEmpty>No member found.</CommandEmpty>
+                                        <CommandGroup>
+                                            {members.map((member) => (
+                                                <CommandItem
+                                                    key={member.id}
+                                                    value={member.fullName || ""}
+                                                    onSelect={() => {
+                                                        setSelectedMember(member.id)
+                                                        setOpenCombobox(false)
+                                                    }}
+                                                >
+                                                    <Check
+                                                        className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            selectedMember === member.id ? "opacity-100" : "opacity-0"
+                                                        )}
+                                                    />
+                                                    {member.fullName}
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
                     </div>
 
                     <div className="space-y-2">

@@ -6,6 +6,11 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
 import { FundSettingsDialog } from "@/components/Admin/FundSettingsDialog";
 import { YearSelect } from "@/components/Dashboard/YearSelect";
+import { ContributionForm } from "@/components/Dashboard/ContributionForm";
+import { ExpenseManager } from "@/components/Admin/ExpenseManager";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Trophy, Archive, ArrowLeft } from "lucide-react";
 
 interface PageProps {
     params: Promise<{ familyId: string }>;
@@ -81,14 +86,31 @@ async function getGeneralFundData(familyId: string, year: number) {
         grandTotal += amount;
     });
 
+    // Get general fund expenses
+    const expenses = await prisma.expense.findMany({
+        where: {
+            familyId,
+            campaignId: null,
+            date: {
+                gte: startOfYear,
+                lt: endOfYear
+            }
+        },
+        orderBy: { date: 'desc' }
+    });
+
+    const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+
     return {
         members,
         contributions,
+        expenses,
         minContribution: family ? Number(family.baseShareValue) : 100,
         monthlyTarget: latestTarget ? Number(latestTarget.targetAmount) : 5000,
         years,
         memberTotals,
-        grandTotal
+        grandTotal,
+        totalExpenses
     };
 }
 
@@ -99,11 +121,15 @@ export default async function GeneralFundPage({ params, searchParams }: PageProp
     const currentYear = new Date().getFullYear();
     const selectedYear = resolvedSearchParams.year ? parseInt(resolvedSearchParams.year as string) : currentYear;
 
-    // Check permissions for settings button
+    // Check permissions
     const userFamily = await getUserFamily(familyId);
     const isPresident = userFamily?.role === 'PRESIDENT';
+    const isTreasurer = userFamily?.role === 'TREASURER';
+    const canManageFunds = isPresident || isTreasurer;
 
-    const { members, contributions, minContribution, monthlyTarget, years, memberTotals, grandTotal } = await getGeneralFundData(familyId, selectedYear);
+    const { members, contributions, expenses, minContribution, monthlyTarget, years, memberTotals, grandTotal, totalExpenses } = await getGeneralFundData(familyId, selectedYear);
+
+    const netBalance = grandTotal - totalExpenses;
 
     const months = [
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -124,13 +150,31 @@ export default async function GeneralFundPage({ params, searchParams }: PageProp
 
     return (
         <div className="space-y-8">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight">General Fund / Monthly Dues</h2>
-                    <p className="text-muted-foreground">Tracking monthly contributions for {selectedYear}.</p>
-                </div>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="flex items-center gap-4">
+                    <Link href={`/dashboard/${familyId}`}>
+                        <Button variant="ghost" size="icon">
+                            <ArrowLeft size={24} />
+                        </Button>
+                    </Link>
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight text-gray-dark font-fun">General Fund / Monthly Dues</h2>
+                        <p className="text-gray-mid">Tracking monthly contributions for {selectedYear}.</p>
+                    </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-4">
                     <YearSelect years={years} currentYear={selectedYear} />
+                    <Link href={`/dashboard/${familyId}/leaderboard`}>
+                        <Button variant="secondary" leftIcon={<Trophy size={16} />}>
+                            Leaderboard
+                        </Button>
+                    </Link>
+                    <Link href={`/dashboard/${familyId}/history`}>
+                        <Button variant="outline" leftIcon={<Archive size={16} />}>
+                            Past Campaigns
+                        </Button>
+                    </Link>
+                    {canManageFunds && <ContributionForm familyId={familyId} />}
                     {isPresident && (
                         <FundSettingsDialog
                             familyId={familyId}
@@ -141,81 +185,120 @@ export default async function GeneralFundPage({ params, searchParams }: PageProp
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-                <Card>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="bg-white shadow-soft-drop border-none">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Target ({selectedYear})</CardTitle>
+                        <CardTitle className="text-sm font-bold text-gray-mid uppercase tracking-wide">Monthly Target</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">${monthlyTarget.toLocaleString()}</div>
+                        <div className="text-3xl font-bold text-cousin-purple font-fun">${monthlyTarget.toLocaleString()}</div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="bg-white shadow-soft-drop border-none">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Min. Contribution</CardTitle>
+                        <CardTitle className="text-sm font-bold text-gray-mid uppercase tracking-wide">Total Collected</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">${minContribution.toLocaleString()}</div>
+                        <div className="text-3xl font-bold text-cousin-green font-fun">${grandTotal.toLocaleString()}</div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="bg-white shadow-soft-drop border-none">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Collected ({selectedYear})</CardTitle>
+                        <CardTitle className="text-sm font-bold text-gray-mid uppercase tracking-wide">Total Expenses</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-green-600">${grandTotal.toLocaleString()}</div>
+                        <div className="text-3xl font-bold text-red-500 font-fun">-${totalExpenses.toLocaleString()}</div>
+                    </CardContent>
+                </Card>
+                <Card className={`shadow-soft-drop border-none ${netBalance >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
+                    <CardHeader className="pb-2">
+                        <CardTitle className={`text-sm font-bold uppercase tracking-wide ${netBalance >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>Net Balance</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className={`text-3xl font-bold font-fun ${netBalance >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
+                            ${netBalance.toLocaleString()}
+                        </div>
                     </CardContent>
                 </Card>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Contribution Matrix</CardTitle>
-                </CardHeader>
-                <CardContent className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="text-xs text-muted-foreground uppercase bg-muted/50">
-                            <tr>
-                                <th className="px-4 py-3 rounded-tl-lg">Member</th>
-                                {months.map(m => (
-                                    <th key={m} className="px-4 py-3 text-center">{m}</th>
-                                ))}
-                                <th className="px-4 py-3 text-center font-bold">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {members.map(member => (
-                                <tr key={member.id} className="border-b last:border-0 hover:bg-muted/50">
-                                    <td className="px-4 py-3 font-medium flex items-center gap-2">
-                                        <Avatar className="h-6 w-6">
-                                            <AvatarImage src={member.user.avatarUrl || ""} />
-                                            <AvatarFallback>{member.user.fullName?.[0]}</AvatarFallback>
-                                        </Avatar>
-                                        <span className="truncate max-w-[150px]">{member.user.fullName}</span>
-                                    </td>
-                                    {months.map((_, index) => {
-                                        const status = getStatus(member.user.id, index);
-                                        let colorClass = "bg-gray-100 text-gray-800"; // Unpaid
-                                        if (status === "PAID") colorClass = "bg-green-100 text-green-800";
-                                        if (status === "PARTIAL") colorClass = "bg-yellow-100 text-yellow-800";
-
-                                        return (
-                                            <td key={index} className="px-2 py-3 text-center">
-                                                <span className={`px-2 py-1 rounded text-xs font-semibold ${colorClass}`}>
-                                                    {status === "UNPAID" ? "-" : status}
-                                                </span>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-8">
+                    <Card className="overflow-hidden border-none shadow-medium">
+                        <CardHeader className="bg-gray-50/50">
+                            <CardTitle className="text-xl font-bold text-gray-dark font-fun">Contribution Matrix</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0 overflow-x-auto">
+                            <table className="w-full text-sm text-left">
+                                <thead className="text-xs text-gray-mid uppercase bg-gray-50 border-b border-gray-100">
+                                    <tr>
+                                        <th className="px-6 py-4 font-bold">Member</th>
+                                        {months.map(m => (
+                                            <th key={m} className="px-4 py-4 text-center font-bold">{m}</th>
+                                        ))}
+                                        <th className="px-6 py-4 text-center font-bold text-gray-dark">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {members.map(member => (
+                                        <tr key={member.id} className="hover:bg-gray-50/50 transition-colors">
+                                            <td className="px-6 py-4 font-medium flex items-center gap-3">
+                                                <Avatar className="h-8 w-8 border-2 border-white shadow-sm">
+                                                    <AvatarImage src={member.user.avatarUrl || ""} />
+                                                    <AvatarFallback className="bg-cousin-blue/10 text-cousin-blue font-bold">
+                                                        {member.user.fullName?.[0]}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <span className="truncate max-w-[150px] text-gray-dark font-semibold">{member.user.fullName}</span>
                                             </td>
-                                        );
-                                    })}
-                                    <td className="px-4 py-3 text-center font-bold">
-                                        ${(memberTotals[member.user.id] || 0).toLocaleString()}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </CardContent>
-            </Card>
+                                            {months.map((_, index) => {
+                                                const status = getStatus(member.user.id, index);
+                                                let colorClass = "bg-gray-100 text-gray-400"; // Unpaid
+                                                let icon = "•";
+
+                                                if (status === "PAID") {
+                                                    colorClass = "bg-cousin-green/10 text-cousin-green";
+                                                    icon = "✓";
+                                                }
+                                                if (status === "PARTIAL") {
+                                                    colorClass = "bg-cousin-yellow/20 text-cousin-yellow-dark";
+                                                    icon = "≈";
+                                                }
+
+                                                return (
+                                                    <td key={index} className="px-2 py-4 text-center">
+                                                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${colorClass}`}>
+                                                            {status === "UNPAID" ? "•" : icon}
+                                                        </span>
+                                                    </td>
+                                                );
+                                            })}
+                                            <td className="px-6 py-4 text-center font-bold text-gray-dark">
+                                                ${(memberTotals[member.user.id] || 0).toLocaleString()}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <div className="lg:col-span-1">
+                    <Card className="border-none shadow-medium">
+                        <CardHeader>
+                            <CardTitle className="text-xl font-bold text-gray-dark font-fun">Fund Expenses</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ExpenseManager
+                                familyId={familyId}
+                                expenses={expenses}
+                                canManage={canManageFunds}
+                            />
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
         </div>
     );
 }

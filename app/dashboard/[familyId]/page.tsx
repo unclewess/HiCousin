@@ -11,6 +11,7 @@ import { CampaignManager } from "@/components/Admin/CampaignManager";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Archive } from "lucide-react";
 
 import { ActiveCampaignsList } from "@/components/Dashboard/ActiveCampaignsList";
 
@@ -54,6 +55,12 @@ export default async function DashboardPage({ params }: PageProps) {
                     <p className="text-gray-mid font-medium">Monthly Contribution Dashboard</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
+                    <Link href={`/dashboard/${family.id}/general-fund`}>
+                        <Button variant="primary">General Fund</Button>
+                    </Link>
+                    <Link href={`/dashboard/${family.id}/history`}>
+                        <Button variant="outline" leftIcon={<Archive size={16} />}>Past Campaigns</Button>
+                    </Link>
                     <Link href={`/dashboard/${family.id}/reports`}>
                         <Button variant="secondary">View Reports</Button>
                     </Link>
