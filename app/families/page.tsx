@@ -60,7 +60,7 @@ export default async function FamiliesPage() {
                     {/* Existing Families */}
                     {families.map((family) => (
                         <Link key={family.id} href={`/dashboard/${family.id}`} className="block h-full">
-                            <Card variant="hoverable" className="h-full flex flex-col justify-between">
+                            <Card variant="interactive" className="h-full flex flex-col justify-between">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2 text-gray-dark font-fun">
                                         <Users className="h-5 w-5 text-cousin-green" />

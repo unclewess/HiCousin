@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { updateMonthlyTarget } from "@/app/actions";
 
 interface TargetManagerProps {
@@ -58,7 +58,7 @@ export function TargetManager({ familyId, currentTarget }: TargetManagerProps) {
                     </div>
                     {currentTarget > 0 && (
                         <Button
-                            variant="destructive"
+                            variant="danger"
                             size="sm"
                             onClick={() => handleUpdate(0)}
                             disabled={loading}

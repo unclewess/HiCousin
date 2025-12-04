@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 
 export default function DesignSystemPage() {

@@ -8,56 +8,69 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  clerkId       String    @unique @map("clerk_id")
-  email         String
-  fullName      String?   @map("full_name")
-  phoneNumber   String?   @map("phone_number")
-  avatarUrl     String?   @map("avatar_url")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+  id          String   @id @default(uuid())
+  clerkId     String   @unique @map("clerk_id")
+  email       String
+  fullName    String?  @map("full_name")
+  phoneNumber String?  @map("phone_number")
+  avatarUrl   String?  @map("avatar_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
-  createdFamilies Family[] @relation("CreatedBy")
-  memberships     FamilyMember[]
-  contributions   Contribution[]
-  streaks         Streak[]
+  createdFamilies        Family[]            @relation("CreatedBy")
+  memberships            FamilyMember[]
+  contributions          Contribution[]
+  streaks                Streak[]
+  proofs                 ProofOfPayment[]
+  notifications          Notification[]
+  beneficiaryProofs      ProofBeneficiary[]
+  settingsUpdates        FamilySettings[]    @relation("SettingsUpdater")
+  dangerActionsRequested DangerAction[]      @relation("DangerActionRequester")
+  dangerActionsExecuted  DangerAction[]      @relation("DangerActionExecutor")
+  auditLogs              AuditLog[]          @relation("AuditActor")
+  notificationQueue      NotificationQueue[] @relation("NotificationRecipient")
 
   @@map("users")
 }
 
 model Family {
-  id                      String    @id @default(uuid())
+  id                      String   @id @default(uuid())
   name                    String
-  code                    String    @unique
-  createdBy               String?   @map("created_by")
-  baseShareValue          Decimal   @default(100.00) @map("base_share_value") @db.Decimal(10, 2)
-  onTimeBonusPercent      Decimal   @default(2.00) @map("on_time_bonus_percent") @db.Decimal(5, 2)
-  streakBonusPercent      Decimal   @default(5.00) @map("streak_bonus_percent") @db.Decimal(5, 2)
-  contributionDeadlineDay Int       @default(5) @map("contribution_deadline_day")
-  contributionFrequency   String    @default("MONTHLY") @map("contribution_frequency")
-  createdAt               DateTime  @default(now()) @map("created_at")
-  updatedAt               DateTime  @default(now()) @updatedAt @map("updated_at")
+  code                    String   @unique
+  createdBy               String?  @map("created_by")
+  baseShareValue          Decimal  @default(100.00) @map("base_share_value") @db.Decimal(10, 2)
+  onTimeBonusPercent      Decimal  @default(2.00) @map("on_time_bonus_percent") @db.Decimal(5, 2)
+  streakBonusPercent      Decimal  @default(5.00) @map("streak_bonus_percent") @db.Decimal(5, 2)
+  contributionDeadlineDay Int      @default(5) @map("contribution_deadline_day")
+  contributionFrequency   String   @default("MONTHLY") @map("contribution_frequency")
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @default(now()) @updatedAt @map("updated_at")
 
-  creator       User?          @relation("CreatedBy", fields: [createdBy], references: [id])
-  members       FamilyMember[]
-  contributions Contribution[]
+  creator        User?               @relation("CreatedBy", fields: [createdBy], references: [id])
+  members        FamilyMember[]
+  contributions  Contribution[]
   monthlyTargets MonthlyTarget[]
-  campaigns     Campaign[]
-  expenses      Expense[]
+  campaigns      Campaign[]
+  expenses       Expense[]
+  proofs         ProofOfPayment[]
+  settings       FamilySettings?
+  dangerActions  DangerAction[]
+  auditLogs      AuditLog[]
+  notifications  NotificationQueue[]
 
   @@map("families")
 }
 
 model FamilyMember {
-  id        String   @id @default(uuid())
-  familyId  String   @map("family_id")
-  userId    String   @map("user_id")
-  role      String   @default("MEMBER")
-  joinedAt  DateTime @default(now()) @map("joined_at")
-  status    String   @default("ACTIVE")
+  id       String   @id @default(uuid())
+  familyId String   @map("family_id")
+  userId   String   @map("user_id")
+  role     String   @default("MEMBER")
+  joinedAt DateTime @default(now()) @map("joined_at")
+  status   String   @default("ACTIVE")
 
-  family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family                 Family                @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user                   User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   campaignParticipations CampaignParticipant[]
 
   @@unique([familyId, userId])
@@ -65,73 +78,76 @@ model FamilyMember {
 }
 
 model Contribution {
-  id                String   @id @default(uuid())
-  familyId          String   @map("family_id")
-  userId            String   @map("user_id")
-  campaignId        String?  @map("campaign_id")
-  amount            Decimal  @db.Decimal(10, 2)
-  shares            Decimal  @db.Decimal(10, 2)
-  baseShares        Decimal  @default(0) @map("base_shares") @db.Decimal(10, 2)
-  onTimeBonus       Decimal  @default(0) @map("on_time_bonus") @db.Decimal(10, 2)
-  streakBonus       Decimal  @default(0) @map("streak_bonus") @db.Decimal(10, 2)
-  contributionMonth DateTime @map("contribution_month") @db.Date // First day of month
+  id                String    @id @default(uuid())
+  familyId          String    @map("family_id")
+  userId            String    @map("user_id")
+  campaignId        String?   @map("campaign_id")
+  amount            Decimal   @db.Decimal(10, 2)
+  shares            Decimal   @db.Decimal(10, 2)
+  baseShares        Decimal   @default(0) @map("base_shares") @db.Decimal(10, 2)
+  onTimeBonus       Decimal   @default(0) @map("on_time_bonus") @db.Decimal(10, 2)
+  streakBonus       Decimal   @default(0) @map("streak_bonus") @db.Decimal(10, 2)
+  contributionMonth DateTime  @map("contribution_month") @db.Date // First day of month
   paidAt            DateTime? @map("paid_at")
-  status            String   @default("PENDING")
+  status            String    @default("PENDING")
   notes             String?
-  verifiedBy        String?  @map("verified_by")
-  createdAt         DateTime @default(now()) @map("created_at")
+  verifiedBy        String?   @map("verified_by")
+  createdAt         DateTime  @default(now()) @map("created_at")
 
-  family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  campaign  Campaign? @relation(fields: [campaignId], references: [id])
+  family      Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign    Campaign?         @relation(fields: [campaignId], references: [id])
+  proof       ProofOfPayment?
+  beneficiary ProofBeneficiary?
 
   @@map("contributions")
 }
 
 model MonthlyTarget {
-  id           String   @id @default(uuid())
-  familyId     String   @map("family_id")
+  id           String  @id @default(uuid())
+  familyId     String  @map("family_id")
   year         Int
   month        Int
-  targetAmount Decimal  @map("target_amount") @db.Decimal(10, 2)
+  targetAmount Decimal @map("target_amount") @db.Decimal(10, 2)
 
-  family       Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
 
   @@unique([familyId, year, month])
   @@map("monthly_targets")
 }
 
 model Streak {
-  id                    String   @id @default(uuid())
-  userId                String   @map("user_id")
-  currentStreak         Int      @default(0) @map("current_streak")
-  longestStreak         Int      @default(0) @map("longest_streak")
+  id                    String    @id @default(uuid())
+  userId                String    @map("user_id")
+  currentStreak         Int       @default(0) @map("current_streak")
+  longestStreak         Int       @default(0) @map("longest_streak")
   lastContributionMonth DateTime? @map("last_contribution_month") @db.Date
 
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
   @@map("streaks")
 }
 
 model Campaign {
-  id              String   @id @default(uuid())
-  familyId        String   @map("family_id")
-  name            String
-  description     String?
-  targetAmount    Decimal? @map("target_amount") @db.Decimal(10, 2)
-  minContribution Decimal? @map("min_contribution") @db.Decimal(10, 2)
-  deadline        DateTime?
-  status          String   @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
-  type            String   @default("ADHOC") // MONTHLY, ADHOC
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
-  reconciliationNotes String? @map("reconciliation_notes")
+  id                  String    @id @default(uuid())
+  familyId            String    @map("family_id")
+  name                String
+  description         String?
+  targetAmount        Decimal?  @map("target_amount") @db.Decimal(10, 2)
+  minContribution     Decimal?  @map("min_contribution") @db.Decimal(10, 2)
+  deadline            DateTime?
+  status              String    @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
+  type                String    @default("ADHOC") // MONTHLY, ADHOC
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
+  reconciliationNotes String?   @map("reconciliation_notes")
 
   family        Family                @relation(fields: [familyId], references: [id], onDelete: Cascade)
   participants  CampaignParticipant[]
   contributions Contribution[]
   expenses      Expense[]
+  proofs        ProofOfPayment[]
 
   @@map("campaigns")
 }
@@ -164,4 +180,192 @@ model Expense {
   campaign Campaign? @relation(fields: [campaignId], references: [id])
 
   @@map("expenses")
+}
+
+model ProofOfPayment {
+  id             String   @id @default(uuid())
+  familyId       String   @map("family_id")
+  userId         String   @map("user_id")
+  amount         Decimal  @db.Decimal(10, 2)
+  currency       String   @default("KES")
+  paymentChannel String   @map("payment_channel") // MPESA, BANK, CASH
+  transactionRef String?  @map("transaction_ref") // Optional for proofless claims
+  paymentDate    DateTime @map("payment_date")
+
+  // Message-based proof fields
+  rawMessage       String?  @map("raw_message") @db.Text // Encrypted SMS/WhatsApp text
+  messageHash      String?  @map("message_hash") // SHA-256 for duplicate detection
+  parserConfidence Decimal? @map("parser_confidence") @db.Decimal(3, 2) // 0.00-1.00
+
+  // Image-based proof (now optional)
+  imageUrl String? @map("image_url")
+
+  // Fraud detection
+  fraudScore  Int?    @default(0) @map("fraud_score") // 0-100
+  isProofless Boolean @default(false) @map("is_proofless") // Manual entry without proof
+
+  // Status and verification
+  status          String    @default("PENDING") // PENDING, APPROVED, REJECTED, DISPUTED, ESCALATED, UNVERIFIED_CLAIM
+  rejectionReason String?   @map("rejection_reason")
+  verifiedBy      String?   @map("verified_by")
+  verifiedAt      DateTime? @map("verified_at")
+
+  // Multi-beneficiary support
+  amountAllocated Decimal? @map("amount_allocated") @db.Decimal(10, 2) // Total allocated to beneficiaries
+
+  // Legacy single contribution (deprecated for multi-beneficiary)
+  contributionId String? @unique @map("contribution_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  family        Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contribution  Contribution?      @relation(fields: [contributionId], references: [id])
+  beneficiaries ProofBeneficiary[]
+  campaignId    String?            @map("campaign_id")
+  campaign      Campaign?          @relation(fields: [campaignId], references: [id])
+
+  @@index([messageHash])
+  @@index([transactionRef])
+  @@index([status])
+  @@index([familyId, status])
+  @@map("proofs_of_payment")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  type      String // PROOF_SUBMITTED, PROOF_APPROVED, PROOF_REJECTED
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model ProofBeneficiary {
+  id              String   @id @default(uuid())
+  proofId         String   @map("proof_id")
+  userId          String   @map("user_id")
+  allocatedAmount Decimal  @map("allocated_amount") @db.Decimal(10, 2)
+  contributionId  String?  @unique @map("contribution_id") // Created on approval
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  proof        ProofOfPayment @relation(fields: [proofId], references: [id], onDelete: Cascade)
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contribution Contribution?  @relation(fields: [contributionId], references: [id])
+
+  @@index([proofId])
+  @@index([userId])
+  @@map("proof_beneficiaries")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  familyId    String   @map("family_id")
+  entityType  String   @map("entity_type") // proof, contribution, settings, danger_action, etc.
+  entityId    String?  @map("entity_id")
+  action      String // CREATED, EDITED, APPROVED, REJECTED, OVERRIDDEN, ESCALATED, etc.
+  actorId     String   @map("actor_id")
+  actorRole   String?  @map("actor_role")
+  beforeState Json?    @map("before_state")
+  afterState  Json?    @map("after_state")
+  reason      String?
+  ipAddress   String?  @map("ip_address")
+  deviceInfo  Json?    @map("device_info")
+  requestId   String?  @map("request_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  actor  User   @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([familyId])
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+// ============================================
+// Settings & RBAC System Models
+// ============================================
+
+model FamilySettings {
+  id             String   @id @default(uuid())
+  familyId       String   @unique @map("family_id")
+  version        Int      @default(1)
+  settings       Json // The main settings JSONB
+  versionHistory Json     @default("[]") @map("version_history") // Array of version changes
+  updatedBy      String   @map("updated_by")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  family  Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  updater User   @relation("SettingsUpdater", fields: [updatedBy], references: [id])
+
+  @@map("family_settings")
+}
+
+model RolePermission {
+  id            String   @id @default(uuid())
+  role          String // PRESIDENT, TREASURER, MEMBER
+  permissionKey String   @map("permission_key")
+  enabled       Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@unique([role, permissionKey])
+  @@index([role])
+  @@map("role_permissions")
+}
+
+model DangerAction {
+  id                String    @id @default(uuid())
+  familyId          String    @map("family_id")
+  actionType        String    @map("action_type") // delete_group, override_contribution, reset_leaderboard
+  payload           Json // What will be changed
+  requestedBy       String    @map("requested_by")
+  requestedAt       DateTime  @default(now()) @map("requested_at")
+  requiredApprovals Json      @map("required_approvals") // [{"role":"president","userId":"..."}]
+  approvals         Json      @default("[]") // Array of approvals
+  status            String    @default("PENDING") // PENDING, APPROVED, REJECTED, EXECUTED, CANCELLED
+  reason            String?
+  coolingEndsAt     DateTime? @map("cooling_ends_at")
+  executedBy        String?   @map("executed_by")
+  executedAt        DateTime? @map("executed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  family    Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  requester User   @relation("DangerActionRequester", fields: [requestedBy], references: [id])
+  executor  User?  @relation("DangerActionExecutor", fields: [executedBy], references: [id])
+
+  @@index([familyId])
+  @@index([status])
+  @@map("danger_actions")
+}
+
+model NotificationQueue {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  familyId  String?   @map("family_id")
+  type      String // DANGER_ACTION_PENDING, EMERGENCY_OVERRIDE, PROOF_SUBMITTED, etc.
+  title     String
+  message   String    @db.Text
+  actionUrl String?   @map("action_url")
+  priority  String    @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  channels  Json      @default("[]") // ["in_app", "whatsapp", "email"]
+  sentAt    DateTime? @map("sent_at")
+  isRead    Boolean   @default(false) @map("is_read")
+  readAt    DateTime? @map("read_at")
+  metadata  Json? // Additional context
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user   User    @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  family Family? @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([familyId])
+  @@map("notification_queue")
 }
