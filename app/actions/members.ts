@@ -2,6 +2,8 @@
 
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/db";
+import { requirePermission } from "@/lib/permissions/check";
+import { PERMISSIONS } from "@/lib/permissions";
 
 export interface MemberOption {
     userId: string;
@@ -13,27 +15,8 @@ export interface MemberOption {
  * Fetch active family members for beneficiary selection
  */
 export async function getFamilyMembers(familyId: string): Promise<MemberOption[]> {
-    const { userId: clerkUserId } = await auth();
-    if (!clerkUserId) throw new Error("Unauthorized");
-
-    // Get database user ID from Clerk ID
-    const dbUser = await prisma.user.findUnique({
-        where: { clerkId: clerkUserId }
-    });
-
-    if (!dbUser) throw new Error("User not found in database");
-
-    // Verify user is in the family
-    const membership = await prisma.familyMember.findUnique({
-        where: {
-            familyId_userId: {
-                familyId,
-                userId: dbUser.id,
-            },
-        },
-    });
-
-    if (!membership) throw new Error("Not a member of this family");
+    // Verify permission (implicitly checks auth and membership)
+    await requirePermission(familyId, PERMISSIONS.VIEW_MEMBERS);
 
     // Fetch all active members
     const members = await prisma.familyMember.findMany({

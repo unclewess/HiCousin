@@ -7,6 +7,7 @@ import { Trophy, Medal, Award, ArrowLeft, Calendar, Flame, Clock, Sunrise, Check
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/badge";
+import { LeaderboardPodium, LeaderboardRow } from "./LeaderboardComponents";
 
 interface LeaderboardEntry {
     userId: string;
@@ -103,151 +104,33 @@ export function LeaderboardClient({ familyId, activeMembers, inactiveMembers, me
             </div>
 
             {/* Top 3 Podium */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end max-w-4xl mx-auto">
-                {/* 2nd Place */}
-                {topThree[1] && (
-                    <Card className="order-2 md:order-1 bg-gradient-to-b from-gray-100 to-gray-200 border-none shadow-medium transform hover:-translate-y-2 transition-transform">
-                        <CardHeader className="text-center pb-2">
-                            <Medal className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-                            <CardTitle className="text-gray-600 font-fun text-xl">Silver Cousin</CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-center">
-                            <Avatar className="w-20 h-20 mx-auto border-4 border-gray-300 mb-4">
-                                <AvatarImage src={topThree[1].avatarUrl || ""} />
-                                <AvatarFallback>{topThree[1].fullName?.[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="font-bold text-lg text-gray-dark">{topThree[1].fullName}</div>
-                            <div className="text-gray-500 font-mono font-bold text-sm">{topThree[1].totalShares.toFixed(2)} shares</div>
-                            <div className="flex items-center justify-center gap-2 mt-2">
-                                {topThree[1].currentStreak > 0 && (
-                                    <Badge className="bg-orange-100 text-orange-700 border-orange-200">
-                                        <Flame size={12} className="mr-1" />{topThree[1].currentStreak}mo
-                                    </Badge>
-                                )}
-                                {(() => {
-                                    const badge = getBadge(topThree[1].lastContributionStatus);
-                                    return badge && (
-                                        <Badge className={badge.color + " border"}>
-                                            {badge.icon} <span className="ml-1">{badge.label}</span>
-                                        </Badge>
-                                    );
-                                })()}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* 1st Place */}
-                {topThree[0] && (
-                    <Card className="order-1 md:order-2 bg-gradient-to-b from-yellow-50 to-yellow-100 border-2 border-yellow-200 shadow-soft-drop transform scale-110 z-10">
-                        <CardHeader className="text-center pb-2">
-                            <Trophy className="w-16 h-16 mx-auto text-yellow-500 mb-2 animate-bounce" />
-                            <CardTitle className="text-yellow-700 font-fun text-2xl">Golden Cousin</CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-center">
-                            <Avatar className="w-24 h-24 mx-auto border-4 border-yellow-400 mb-4 shadow-lg">
-                                <AvatarImage src={topThree[0].avatarUrl || ""} />
-                                <AvatarFallback>{topThree[0].fullName?.[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="font-bold text-xl text-gray-dark">{topThree[0].fullName}</div>
-                            <div className="text-yellow-600 font-mono font-bold text-lg">{topThree[0].totalShares.toFixed(2)} shares</div>
-                            <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
-                                {topThree[0].currentStreak > 0 && (
-                                    <Badge className="bg-orange-100 text-orange-700 border-orange-200">
-                                        <Flame size={12} className="mr-1" />{topThree[0].currentStreak}mo
-                                    </Badge>
-                                )}
-                                {(() => {
-                                    const badge = getBadge(topThree[0].lastContributionStatus);
-                                    return badge && (
-                                        <Badge className={badge.color + " border"}>
-                                            {badge.icon} <span className="ml-1">{badge.label}</span>
-                                        </Badge>
-                                    );
-                                })()}
-                            </div>
-                            <div className="mt-4 text-sm font-medium text-yellow-800 bg-yellow-200/50 py-1 px-3 rounded-full inline-block">
-                                👑 Legendary Status!
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* 3rd Place */}
-                {topThree[2] && (
-                    <Card className="order-3 bg-gradient-to-b from-orange-50 to-orange-100 border-none shadow-medium transform hover:-translate-y-2 transition-transform">
-                        <CardHeader className="text-center pb-2">
-                            <Award className="w-12 h-12 mx-auto text-orange-400 mb-2" />
-                            <CardTitle className="text-orange-700 font-fun text-xl">Bronze Cousin</CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-center">
-                            <Avatar className="w-20 h-20 mx-auto border-4 border-orange-300 mb-4">
-                                <AvatarImage src={topThree[2].avatarUrl || ""} />
-                                <AvatarFallback>{topThree[2].fullName?.[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="font-bold text-lg text-gray-dark">{topThree[2].fullName}</div>
-                            <div className="text-orange-600 font-mono font-bold text-sm">{topThree[2].totalShares.toFixed(2)} shares</div>
-                            <div className="flex items-center justify-center gap-2 mt-2">
-                                {topThree[2].currentStreak > 0 && (
-                                    <Badge className="bg-orange-100 text-orange-700 border-orange-200">
-                                        <Flame size={12} className="mr-1" />{topThree[2].currentStreak}mo
-                                    </Badge>
-                                )}
-                                {(() => {
-                                    const badge = getBadge(topThree[2].lastContributionStatus);
-                                    return badge && (
-                                        <Badge className={badge.color + " border"}>
-                                            {badge.icon} <span className="ml-1">{badge.label}</span>
-                                        </Badge>
-                                    );
-                                })()}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-            </div>
+            <LeaderboardPodium
+                topThree={topThree.map(member => ({
+                    id: member.userId,
+                    fullName: member.fullName,
+                    avatarUrl: member.avatarUrl,
+                    totalContributed: member.totalAmount,
+                    rank: member.rank
+                }))}
+            />
 
             {/* The Rest */}
             {others.length > 0 && (
-                <Card className="max-w-3xl mx-auto border-none shadow-sm">
-                    <CardHeader>
-                        <CardTitle className="font-fun text-gray-mid">Honorable Mentions</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-3">
-                            {others.map((member) => (
-                                <div key={member.userId} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                                    <div className="flex items-center gap-4">
-                                        <span className="font-bold text-gray-400 w-8 text-center">#{member.rank}</span>
-                                        <Avatar>
-                                            <AvatarImage src={member.avatarUrl || ""} />
-                                            <AvatarFallback>{member.fullName?.[0]}</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <div className="font-medium text-gray-dark">{member.fullName}</div>
-                                            <div className="text-xs text-gray-500 font-mono">{member.totalShares.toFixed(2)} shares</div>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        {member.currentStreak > 0 && (
-                                            <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs">
-                                                <Flame size={10} className="mr-1" />{member.currentStreak}
-                                            </Badge>
-                                        )}
-                                        {(() => {
-                                            const badge = getBadge(member.lastContributionStatus);
-                                            return badge && (
-                                                <Badge className={badge.color + " border text-xs"}>
-                                                    {badge.icon}
-                                                </Badge>
-                                            );
-                                        })()}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="max-w-3xl mx-auto space-y-3">
+                    <h3 className="text-xl font-bold text-gray-600 font-outfit mb-4">Honorable Mentions</h3>
+                    {others.map((member) => (
+                        <LeaderboardRow
+                            key={member.userId}
+                            member={{
+                                id: member.userId,
+                                fullName: member.fullName,
+                                avatarUrl: member.avatarUrl,
+                                totalContributed: member.totalAmount,
+                                rank: member.rank
+                            }}
+                        />
+                    ))}
+                </div>
             )}
 
             {/* Ghost Town Section */}

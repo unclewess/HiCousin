@@ -43,12 +43,13 @@ const config: Config = {
                     DEFAULT: "hsl(var(--card))",
                     foreground: "hsl(var(--card-foreground))",
                 },
+                // Playful color palette
+                'cousin-purple': 'hsl(var(--cousin-purple))',
+                'cousin-blue': 'hsl(var(--cousin-blue))',
+                'cousin-pink': 'hsl(var(--cousin-pink))',
+                'cousin-orange': 'hsl(var(--cousin-orange))',
+                'cousin-green': 'hsl(var(--cousin-green))',
                 // Existing custom colors
-                'cousin-green': '#4CC38A',
-                'cousin-yellow': '#FADB5F',
-                'cousin-blue': '#60A5FA',
-                'cousin-pink': '#FFA9C0',
-                'cousin-purple': '#A78BFA',
                 white: '#FFFFFF',
                 'gray-light': '#F3F4F6',
                 'gray-mid': '#9CA3AF',
@@ -71,6 +72,7 @@ const config: Config = {
                 sans: ['var(--font-inter)', 'sans-serif'],
                 secondary: ['var(--font-nunito)', 'sans-serif'],
                 fun: ['var(--font-baloo)', 'cursive'],
+                outfit: ['var(--font-outfit)', 'sans-serif'],
             },
             keyframes: {
                 "accordion-down": {
@@ -88,12 +90,17 @@ const config: Config = {
                     '30%': { transform: 'rotate(14.0deg)' },
                     '40%': { transform: 'rotate(-4.0deg)' },
                     '50%': { transform: 'rotate(10.0deg)' },
+                },
+                shimmer: {
+                    '0%': { backgroundPosition: '-1000px 0' },
+                    '100%': { backgroundPosition: '1000px 0' },
                 }
             },
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
                 "accordion-up": "accordion-up 0.2s ease-out",
                 "wave": "wave 2.5s infinite",
+                "shimmer": "shimmer 2s infinite linear",
             },
             boxShadow: {
                 'soft-drop': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',

@@ -6,6 +6,10 @@ import { revalidatePath } from "next/cache";
 import { encrypt, decrypt } from "@/lib/encryption";
 import { generateMessageHash, generateProofHash } from "@/lib/hash";
 import { calculateFraudScore } from "@/lib/fraud";
+import { requirePermission } from "@/lib/permissions/check";
+import { PERMISSIONS } from "@/lib/permissions";
+import { auditProofAction } from "@/lib/audit/logger";
+import { sendNotification, NotificationTemplates } from "@/lib/notifications";
 
 interface BeneficiaryAllocation {
     userId: string;
@@ -132,23 +136,26 @@ export async function submitProof(formData: FormData) {
                         allocatedAmount: b.amount
                     }))
                 } : undefined,
-
-                auditLogs: {
-                    create: {
-                        action: "CREATED",
-                        performedBy: userId,
-                        newValue: JSON.stringify({
-                            amount,
-                            ref: transactionRef,
-                            type: submissionType,
-                            fraudScore,
-                            fraudReasons
-                        }),
-                        reason: fraudReasons.length > 0 ? `Flagged: ${fraudReasons.join(", ")}` : "Initial submission"
-                    }
-                }
             }
         });
+
+        // Create audit log separately (ProofOfPayment doesn't have auditLogs relation)
+        await auditProofAction(
+            proof.id,
+            familyId,
+            "CREATED",
+            userId,
+            "MEMBER", // role of the submitter
+            null, // no beforeState for creation
+            {
+                amount,
+                ref: transactionRef,
+                type: submissionType,
+                fraudScore,
+                fraudReasons
+            },
+            fraudReasons.length > 0 ? `Flagged: ${fraudReasons.join(", ")}` : "Initial submission"
+        );
 
         // 5. Notify Treasurers
         const admins = await prisma.familyMember.findMany({
@@ -234,42 +241,46 @@ export async function verifyProof(
 
         if (!proof) return { error: "Proof not found" };
 
-        // Permission check
-        const verifier = await prisma.familyMember.findUnique({
-            where: { familyId_userId: { familyId: proof.familyId, userId } }
-        });
-
-        if (!verifier || !["ADMIN", "TREASURER", "PRESIDENT"].includes(verifier.role)) {
-            return { error: "Insufficient permissions" };
-        }
+        // Permission check using new RBAC system
+        const { userId: verifierId, role: verifierRole } = await requirePermission(
+            proof.familyId,
+            PERMISSIONS.VERIFY_PROOFS
+        );
 
         if (status === "REJECTED") {
+            const beforeState = { status: proof.status };
+
             await prisma.$transaction([
                 prisma.proofOfPayment.update({
                     where: { id: proofId },
                     data: {
                         status: "REJECTED",
                         rejectionReason,
-                        verifiedBy: userId,
+                        verifiedBy: verifierId,
                         verifiedAt: new Date()
-                    }
-                }),
-                prisma.auditLog.create({
-                    data: {
-                        proofId,
-                        action: "REJECTED",
-                        performedBy: userId,
-                        reason: rejectionReason
-                    }
-                }),
-                prisma.notification.create({
-                    data: {
-                        userId: proof.userId,
-                        type: "PROOF_REJECTED",
-                        message: `Proof rejected: ${rejectionReason}`
                     }
                 })
             ]);
+
+            // Create audit log using new system
+            await auditProofAction(
+                proofId,
+                proof.familyId,
+                'REJECTED',
+                verifierId,
+                verifierRole,
+                beforeState,
+                { status: 'REJECTED', rejectionReason },
+                rejectionReason
+            );
+
+            // Send notification using new service
+            await sendNotification({
+                userId: proof.userId,
+                familyId: proof.familyId,
+                ...NotificationTemplates.PROOF_REJECTED(proof.amount.toNumber(), rejectionReason || 'No reason provided'),
+                actionUrl: `/dashboard/${proof.familyId}/proofs`,
+            });
 
             revalidatePath(`/dashboard/${proof.familyId}`);
             return { success: true };
@@ -325,48 +336,54 @@ export async function verifyProof(
                     where: { id: proofId },
                     data: {
                         status: "APPROVED",
-                        verifiedBy: userId,
+                        verifiedBy: verifierId,
                         verifiedAt: new Date()
                     }
                 });
+            });
 
-                // Audit Log
-                await tx.auditLog.create({
-                    data: {
-                        proofId,
-                        action: "APPROVED",
-                        performedBy: userId
-                    }
-                });
+            // Create audit log using new system (outside transaction)
+            await auditProofAction(
+                proofId,
+                proof.familyId,
+                'APPROVED',
+                verifierId,
+                verifierRole,
+                { status: proof.status },
+                { status: 'APPROVED' }
+            );
 
-                // Notify Submitter
-                await tx.notification.create({
-                    data: {
-                        userId: proof.userId,
-                        type: "PROOF_APPROVED",
-                        message: `Proof for ${proof.transactionRef || 'payment'} approved!`
-                    }
-                });
+            // Send notification using new service
+            await sendNotification({
+                userId: proof.userId,
+                familyId: proof.familyId,
+                ...NotificationTemplates.PROOF_APPROVED(proof.amount.toNumber()),
+                actionUrl: `/dashboard/${proof.familyId}/proofs`,
+            });
 
-                // Notify Beneficiaries (if different from submitter)
-                if (proof.beneficiaries.length > 0) {
-                    for (const b of proof.beneficiaries) {
-                        if (b.userId !== proof.userId) {
-                            await tx.notification.create({
-                                data: {
-                                    userId: b.userId,
-                                    type: "PROOF_APPROVED",
-                                    message: `A payment of ${proof.currency} ${b.allocatedAmount} was made on your behalf by the submitter.`
-                                }
-                            });
-                        }
+
+            // Notify beneficiaries if multi-beneficiary
+            if (proof.beneficiaries.length > 0) {
+                for (const beneficiary of proof.beneficiaries) {
+                    if (beneficiary.userId !== proof.userId) {
+                        await sendNotification({
+                            userId: beneficiary.userId,
+                            familyId: proof.familyId,
+                            type: 'PROOF_APPROVED',
+                            title: 'Contribution Approved',
+                            message: `A contribution of KES ${beneficiary.allocatedAmount} was approved on your behalf`,
+                            priority: 'NORMAL',
+                            channels: ['in_app'],
+                            actionUrl: `/dashboard/${proof.familyId}/proofs`,
+                        });
                     }
                 }
-            });
+            }
 
             revalidatePath(`/dashboard/${proof.familyId}`);
             return { success: true };
         }
+
 
     } catch (error) {
         console.error("Error verifying proof:", error);
@@ -450,9 +467,11 @@ export async function disputeProof(proofId: string, reason: string) {
             }),
             prisma.auditLog.create({
                 data: {
-                    proofId,
+                    familyId: proof.familyId,
+                    entityType: "proof",
+                    entityId: proofId,
                     action: "DISPUTED",
-                    performedBy: userId,
+                    actorId: userId,
                     reason
                 }
             }),

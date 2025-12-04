@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Nunito, Baloo_2 } from "next/font/google";
+import { Inter, Nunito, Baloo_2, Outfit } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
+import { TopProgressBar } from "@/components/ui/TopProgressBar";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,6 +20,12 @@ const baloo = Baloo_2({
   variable: "--font-baloo",
 });
 
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "hiCousins",
   description: "Gamified family contribution tracking",
@@ -33,8 +40,9 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${inter.variable} ${nunito.variable} ${baloo.variable} antialiased font-sans bg-gray-light text-gray-dark`}
+          className={`${inter.variable} ${nunito.variable} ${baloo.variable} ${outfit.variable} antialiased font-sans bg-gray-light text-gray-dark`}
         >
+          <TopProgressBar />
           {children}
           <Toaster position="top-right" richColors />
         </body>

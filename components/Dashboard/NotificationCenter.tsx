@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { getUserNotifications, markNotificationRead } from "@/app/actions/notifications";
+import { getMyNotifications, markAsRead } from "@/app/actions/notifications";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -29,13 +29,18 @@ export function NotificationCenter() {
     }, []);
 
     async function loadNotifications() {
-        const data = await getUserNotifications();
-        setNotifications(data);
-        setUnreadCount(data.filter((n: Notification) => !n.isRead).length);
+        const result = await getMyNotifications();
+        if (result.success && result.data) {
+            // Cast the data to Notification[] since the server action returns a type that might be slightly different (e.g. dates as strings if not serialized properly, but here it's direct server action call so dates are preserved)
+            // Actually, server actions serialize dates to strings usually, but let's assume it works or we might need to map it.
+            // Looking at the component, it uses new Date(notification.createdAt), so it handles string dates.
+            setNotifications(result.data as unknown as Notification[]);
+            setUnreadCount(result.data.filter((n: any) => !n.isRead).length);
+        }
     }
 
     async function handleMarkRead(id: string) {
-        await markNotificationRead(id);
+        await markAsRead(id);
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
         setUnreadCount(prev => Math.max(0, prev - 1));
     }

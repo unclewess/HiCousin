@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getFamilyName } from "@/app/actions/getFamilyName";
 import { ChevronRight, Home } from "lucide-react";
-import { NotificationCenter } from "@/components/Dashboard/NotificationCenter";
+import { NotificationCenter } from "@/components/Notifications/NotificationCenter";
 
 export function DashboardHeader() {
     const params = useParams();
@@ -52,7 +52,7 @@ export function DashboardHeader() {
                                     Switch Family
                                 </Button>
                             </Link>
-                            <NotificationCenter />
+                            <NotificationCenter familyId={familyId} />
                             <UserButton showName />
                         </div>
                     </div>
@@ -79,7 +79,7 @@ export function DashboardHeader() {
                         )}
                     </div>
                     <div className="flex items-center gap-2">
-                        <NotificationCenter />
+                        <NotificationCenter familyId={familyId} />
                         <UserButton />
                     </div>
                 </div>

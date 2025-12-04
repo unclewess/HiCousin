@@ -1,6 +1,7 @@
 "use client";
 
 import { Users, TrendingUp, ShieldCheck, Smile } from "lucide-react";
+import { FadeIn, SlideIn } from "@/components/ui/AnimatedComponents";
 
 const features = [
     {
@@ -50,39 +51,46 @@ export function Features() {
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-cousin-blue opacity-10 blur-3xl"></div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-fun font-bold text-cousin-purple mb-6">
-                        Why hiCousins?
-                    </h2>
-                    <p className="text-xl text-gray-mid max-w-2xl mx-auto leading-relaxed font-secondary">
-                        Because managing family money shouldn't feel like a second job.
-                    </p>
-                </div>
+                <FadeIn>
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl md:text-5xl font-fun font-bold text-cousin-purple mb-6">
+                            Why hiCousins?
+                        </h2>
+                        <p className="text-xl text-gray-mid max-w-2xl mx-auto leading-relaxed font-secondary">
+                            Because managing family money shouldn't feel like a second job.
+                        </p>
+                    </div>
+                </FadeIn>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {features.map((feature, index) => (
-                        <div
+                        <SlideIn
                             key={index}
-                            className={`
-                                bg-white/90 backdrop-blur-xl 
-                                p-8 rounded-[2.5rem] 
-                                border-2 ${feature.borderColor}
-                                shadow-xl ${feature.shadowColor} ${feature.hoverShadow}
-                                transition-all duration-300 
-                                hover:-translate-y-2 hover:scale-105
-                                group
-                            `}
+                            direction="up"
+                            delay={index * 0.1}
                         >
-                            <div className={`${feature.bgColor} w-20 h-20 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                                {feature.icon}
+                            <div
+                                className={`
+                                    bg-white/90 backdrop-blur-xl 
+                                    p-8 rounded-[2.5rem] 
+                                    border-2 ${feature.borderColor}
+                                    shadow-xl ${feature.shadowColor} ${feature.hoverShadow}
+                                    transition-all duration-300 
+                                    hover:-translate-y-2 hover:scale-105
+                                    group
+                                `}
+                            >
+                                <div className={`${feature.bgColor} w-20 h-20 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                                    {feature.icon}
+                                </div>
+                                <h3 className="text-2xl font-fun font-bold text-gray-dark mb-3">
+                                    {feature.title}
+                                </h3>
+                                <p className="text-gray-mid leading-relaxed font-medium font-secondary">
+                                    {feature.description}
+                                </p>
                             </div>
-                            <h3 className="text-2xl font-fun font-bold text-gray-dark mb-3">
-                                {feature.title}
-                            </h3>
-                            <p className="text-gray-mid leading-relaxed font-medium font-secondary">
-                                {feature.description}
-                            </p>
-                        </div>
+                        </SlideIn>
                     ))}
                 </div>
             </div>

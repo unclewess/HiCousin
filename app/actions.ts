@@ -688,10 +688,17 @@ export async function getSettingsData(familyId: string) {
             include: { family: true }
         });
 
-        if (!member || member.role !== 'PRESIDENT') return null;
+        // Allow PRESIDENT, ADMIN, and TREASURER to access settings
+        if (!member || !['PRESIDENT', 'ADMIN', 'TREASURER'].includes(member.role)) return null;
 
+        // Convert Decimal fields to numbers for client component serialization
         return {
-            family: member.family
+            family: {
+                ...member.family,
+                baseShareValue: Number(member.family.baseShareValue),
+                onTimeBonusPercent: Number(member.family.onTimeBonusPercent),
+                streakBonusPercent: Number(member.family.streakBonusPercent),
+            }
         };
     } catch (error) {
         console.error("Error fetching settings:", error);
