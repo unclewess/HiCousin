@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Inter, Nunito, Baloo_2, Outfit } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
@@ -42,7 +43,9 @@ export default function RootLayout({
         <body
           className={`${inter.variable} ${nunito.variable} ${baloo.variable} ${outfit.variable} antialiased font-sans bg-gray-light text-gray-dark`}
         >
-          <TopProgressBar />
+          <Suspense fallback={null}>
+            <TopProgressBar />
+          </Suspense>
           {children}
           <Toaster position="top-right" richColors />
         </body>
