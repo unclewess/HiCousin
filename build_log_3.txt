@@ -1,0 +1,266 @@
+﻿
+> hicousins@0.1.0 build
+> next build
+
+node.exe : [baseline-
+browser-mapping] The 
+data in this module 
+is over two months 
+old.  To ensure 
+accurate Baseline 
+data, please update: 
+`npm i baseline-brows
+er-mapping@latest -D`
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" "C:
+\Users\Rowmond\AppDat
+a\Roamin ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : 
+NotSpecifi    ed: 
+([baseline-bro    
+ws...ping@latest -   
+ D`:String) [], Rem  
+  oteException
+    + 
+FullyQualifiedEr    
+rorId : NativeComm   
+ andError
+ 
+   Γû▓ Next.js 16.0.3 (Turbopack)
+   - Environments: .env
+   - Experiments (use with caution):
+     ┬╖ optimizePackageImports
+
+ ΓÜá The 
+"middleware" file 
+convention is 
+deprecated. Please 
+use "proxy" instead. 
+Learn more: https://n
+extjs.org/docs/messag
+es/middleware-to-prox
+y
+   Creating an optimized production build ...
+[baseline-browser-map
+ping] The data in 
+this module is over 
+two months old.  To 
+ensure accurate 
+Baseline data, 
+please update: `npm 
+i baseline-browser-ma
+pping@latest -D`
+(node:5268) [MODULE_T
+YPELESS_PACKAGE_JSON]
+ Warning: Module 
+type of file:///C:/Us
+ers/Rowmond/Documents
+/UncleWess/Dev/HiCous
+in/tailwind.config.ts
+?id=1764872345004 is 
+not specified and it 
+doesn't parse as 
+CommonJS.
+Reparsing as ES 
+module because 
+module syntax was 
+detected. This 
+incurs a performance 
+overhead.
+To eliminate this 
+warning, add "type": 
+"module" to C:\Users\
+Rowmond\Documents\Unc
+leWess\Dev\HiCousin\p
+ackage.json.
+(Use `node 
+--trace-warnings 
+...` to show where 
+the warning was 
+created)
+ Γ£ô Compiled successfully in 14.0s
+   Running TypeScript ...
+   Collecting page data using 7 workers ...
+[baseline-browser-map
+ping] The data in 
+this module is over 
+two months old.  To 
+ensure accurate 
+Baseline data, 
+please update: `npm 
+i baseline-browser-ma
+pping@latest -D`
+[baseline-browser-map
+ping] The data in 
+this module is over 
+two months old.  To 
+ensure accurate 
+Baseline data, 
+please update: `npm 
+i baseline-browser-ma
+pping@latest -D`
+[baseline-browser-map
+ping] The data in 
+this module is over 
+two months old.  To 
+ensure accurate 
+Baseline data, 
+please update: `npm 
+i baseline-browser-ma
+pping@latest -D`
+[baseline-browser-map
+ping] The data in 
+this module is over 
+two months old.  To 
+ensure accurate 
+Baseline data, 
+please update: `npm 
+i baseline-browser-ma
+pping@latest -D`
+[baseline-browser-map
+ping] The data in 
+this module is over 
+two months old.  To 
+ensure accurate 
+Baseline data, 
+please update: `npm 
+i baseline-browser-ma
+pping@latest -D`
+[baseline-browser-map
+ping] The data in 
+this module is over 
+two months old.  To 
+ensure accurate 
+Baseline data, 
+please update: `npm 
+i baseline-browser-ma
+pping@latest -D`
+[baseline-browser-map
+ping] The data in 
+this module is over 
+two months old.  To 
+ensure accurate 
+Baseline data, 
+please update: `npm 
+i baseline-browser-ma
+pping@latest -D`
+Initializing Prisma Client...
+DATABASE_URL is set: postgresql://ne...
+Initializing Prisma Client...
+DATABASE_URL is set: postgresql://ne...
+Initializing Prisma Client...
+DATABASE_URL is set: postgresql://ne...
+Initializing Prisma Client...
+DATABASE_URL is set: postgresql://ne...
+Initializing Prisma Client...
+DATABASE_URL is set: postgresql://ne...
+Initializing Prisma Client...
+DATABASE_URL is set: postgresql://ne...
+   Generating static pages using 7 workers (0/9) ...
+[baseline-browser-map
+ping] The data in 
+this module is over 
+two months old.  To 
+ensure accurate 
+Baseline data, 
+please update: `npm 
+i baseline-browser-ma
+pping@latest -D`
+ Γ¿» 
+useSearchParams() 
+should be wrapped in 
+a suspense boundary 
+at page "/404". Read 
+more: https://nextjs.
+org/docs/messages/mis
+sing-suspense-with-cs
+r-bailout
+    at S (C:\Users\Ro
+wmond\Documents\Uncle
+Wess\Dev\HiCousin\.ne
+xt\server\chunks\ssr\
+node_modules_next_cf0
+2c53c._.js:2:2111)
+    at p (C:\Users\Ro
+wmond\Documents\Uncle
+Wess\Dev\HiCousin\.ne
+xt\server\chunks\ssr\
+node_modules_next_cf0
+2c53c._.js:4:4847)
+    at e (C:\Users\Ro
+wmond\Documents\Uncle
+Wess\Dev\HiCousin\.ne
+xt\server\chunks\ssr\
+[root-of-the-server]_
+_b613f6d1._.js:1:3096
+3)
+    at ar (C:\Users\R
+owmond\Documents\Uncl
+eWess\Dev\HiCousin\no
+de_modules\next\dist\
+compiled\next-server\
+app-page-turbo.runtim
+e.prod.js:2:84366)
+    at aa (C:\Users\R
+owmond\Documents\Uncl
+eWess\Dev\HiCousin\no
+de_modules\next\dist\
+compiled\next-server\
+app-page-turbo.runtim
+e.prod.js:2:86185)
+    at aa (C:\Users\R
+owmond\Documents\Uncl
+eWess\Dev\HiCousin\no
+de_modules\next\dist\
+compiled\next-server\
+app-page-turbo.runtim
+e.prod.js:2:104714)
+    at as (C:\Users\R
+owmond\Documents\Uncl
+eWess\Dev\HiCousin\no
+de_modules\next\dist\
+compiled\next-server\
+app-page-turbo.runtim
+e.prod.js:2:107952)
+    at ao (C:\Users\R
+owmond\Documents\Uncl
+eWess\Dev\HiCousin\no
+de_modules\next\dist\
+compiled\next-server\
+app-page-turbo.runtim
+e.prod.js:2:105374)
+    at ah (C:\Users\R
+owmond\Documents\Uncl
+eWess\Dev\HiCousin\no
+de_modules\next\dist\
+compiled\next-server\
+app-page-turbo.runtim
+e.prod.js:2:112881)
+    at al (C:\Users\R
+owmond\Documents\Uncl
+eWess\Dev\HiCousin\no
+de_modules\next\dist\
+compiled\next-server\
+app-page-turbo.runtim
+e.prod.js:2:109984)
+Error occurred 
+prerendering page 
+"/_not-found". Read 
+more: https://nextjs.
+org/docs/messages/pre
+render-error
+Export encountered 
+an error on 
+/_not-found/page: 
+/_not-found, exiting 
+the build.
+ Γ¿» Next.js build 
+worker exited with 
+code: 1 and signal: 
+null
