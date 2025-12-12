@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { getFamilyName } from "@/app/actions/getFamilyName";
 import { ChevronRight, Home } from "lucide-react";
 import { NotificationCenter } from "@/components/Notifications/NotificationCenter";
+import { Tooltip } from "@/components/ui/Tooltip";
+
 
 export function DashboardHeader() {
     const params = useParams();
@@ -29,9 +31,15 @@ export function DashboardHeader() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center gap-4">
-                            <Link href="/" className="text-2xl font-bold text-cousin-purple font-fun hover:opacity-80 transition-opacity">
-                                hiCousins
-                            </Link>
+                            <Tooltip content="Back to Home" position="bottom">
+                                <Link
+                                    href="/"
+                                    className="text-2xl font-bold text-cousin-purple font-fun hover:opacity-80 hover:scale-105 transition-all duration-200 cursor-pointer"
+                                    aria-label="Go to home page"
+                                >
+                                    hiCousins
+                                </Link>
+                            </Tooltip>
 
                             {familyName && (
                                 <>
@@ -63,9 +71,15 @@ export function DashboardHeader() {
             <nav className="bg-white shadow-sm md:hidden sticky top-0 z-40">
                 <div className="px-4 h-14 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Link href="/" className="text-xl font-bold text-cousin-purple font-fun">
-                            hiCousins
-                        </Link>
+                        <Tooltip content="Back to Home" position="bottom">
+                            <Link
+                                href="/"
+                                className="text-xl font-bold text-cousin-purple font-fun hover:opacity-80 transition-opacity"
+                                aria-label="Go to home page"
+                            >
+                                hiCousins
+                            </Link>
+                        </Tooltip>
                         {familyName && (
                             <>
                                 <ChevronRight className="text-gray-300 w-4 h-4" />
@@ -79,6 +93,11 @@ export function DashboardHeader() {
                         )}
                     </div>
                     <div className="flex items-center gap-2">
+                        <Link href="/" aria-label="Go to home page">
+                            <Button variant="ghost" size="sm" className="p-2">
+                                <Home size={18} />
+                            </Button>
+                        </Link>
                         <NotificationCenter familyId={familyId} />
                         <UserButton />
                     </div>

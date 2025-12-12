@@ -39,9 +39,10 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body
           className={`${inter.variable} ${nunito.variable} ${baloo.variable} ${outfit.variable} antialiased font-sans bg-gray-light text-gray-dark`}
+          suppressHydrationWarning
         >
           <Suspense fallback={null}>
             <TopProgressBar />
