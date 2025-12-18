@@ -106,7 +106,7 @@ async function getGeneralFundData(familyId: string, year: number) {
         contributions,
         expenses,
         minContribution: family ? Number(family.baseShareValue) : 100,
-        monthlyTarget: latestTarget ? Number(latestTarget.targetAmount) : 5000,
+        monthlyTarget: latestTarget ? Number(latestTarget.targetAmount) : 0, // Default to 0 until user sets target
         years,
         memberTotals,
         grandTotal,

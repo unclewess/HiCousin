@@ -38,8 +38,6 @@ export function DashboardHero({ familyName, userName, role, stats }: DashboardHe
     const roleInfo = roleGreetings[role];
     const progressPercentage = (stats.totalCollected / stats.targetAmount) * 100;
 
-    console.log('DashboardHero rendering:', { familyName, userName, role, stats });
-
     return (
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cousin-purple via-cousin-blue to-cousin-pink p-8 md:p-12 text-white shadow-xl">
             {/* Decorative background elements */}

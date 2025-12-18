@@ -3,10 +3,17 @@
  * 
  * Provides functions to create audit logs for tracking all system changes.
  * All audit logs are append-only and include context like IP address and device info.
+ * 
+ * Enhanced with:
+ * - Automatic severity classification
+ * - Impact flags (money, streaks, rules)
+ * - Human-readable summaries
  */
 
 import prisma from '@/lib/db';
 import { headers } from 'next/headers';
+import { getSeverityConfig, AUDIT_SEVERITY } from './severity-config';
+import { generateHumanSummary, MessageContext } from './message-templates';
 
 export interface AuditLogInput {
     familyId: string;
@@ -15,6 +22,7 @@ export interface AuditLogInput {
     action: string; // 'CREATED', 'EDITED', 'APPROVED', 'REJECTED', 'OVERRIDDEN', etc.
     actorId: string;
     actorRole?: string;
+    actorName?: string; // Used for human-readable summary
     beforeState?: any;
     afterState?: any;
     reason?: string;
@@ -22,7 +30,7 @@ export interface AuditLogInput {
 }
 
 /**
- * Create an audit log entry
+ * Create an audit log entry with automatic severity and human summary
  * 
  * @param input - Audit log data
  * @returns Created audit log
@@ -33,7 +41,22 @@ export async function createAuditLog(input: AuditLogInput) {
         const ipAddress = headersList.get('x-forwarded-for') || headersList.get('x-real-ip');
         const userAgent = headersList.get('user-agent');
 
-        return await prisma.auditLog.create({
+        // Get severity configuration for this action
+        const severityConfig = getSeverityConfig(input.action);
+
+        // Generate human-readable summary
+        const messageContext: MessageContext = {
+            actorName: input.actorName || 'Unknown',
+            actorRole: input.actorRole || 'Member',
+            entityType: input.entityType,
+            action: input.action,
+            beforeState: input.beforeState,
+            afterState: input.afterState,
+            reason: input.reason,
+        };
+        const humanSummary = generateHumanSummary(messageContext);
+
+        const auditLog = await prisma.auditLog.create({
             data: {
                 familyId: input.familyId,
                 entityType: input.entityType,
@@ -47,14 +70,69 @@ export async function createAuditLog(input: AuditLogInput) {
                 ipAddress: ipAddress || undefined,
                 deviceInfo: userAgent ? { userAgent } : undefined,
                 requestId: input.requestId || crypto.randomUUID(),
+                // New human-readable fields
+                severity: severityConfig.severity,
+                affectsMoney: severityConfig.affectsMoney,
+                affectsStreaks: severityConfig.affectsStreaks,
+                affectsRules: severityConfig.affectsRules,
+                humanSummary,
             },
         });
+
+        // Send notification for CRITICAL severity actions
+        if (severityConfig.severity === AUDIT_SEVERITY.CRITICAL) {
+            // Fire-and-forget: Don't await to avoid blocking the main flow
+            sendCriticalActionNotification(
+                input.familyId,
+                input.actorName || 'Unknown',
+                humanSummary
+            ).catch(err => console.error('Failed to send critical notification:', err));
+        }
+
+        return auditLog;
     } catch (error) {
         console.error('Error creating audit log:', error);
         // Don't throw - audit logging should not break the main flow
         return null;
     }
 }
+
+/**
+ * Send notification to President and Treasurer for CRITICAL actions
+ */
+async function sendCriticalActionNotification(
+    familyId: string,
+    actorName: string,
+    actionSummary: string
+) {
+    try {
+        // Import here to avoid circular dependencies
+        const { sendBulkNotification, NotificationTemplates } = await import('@/lib/notifications');
+
+        // Get President and Treasurer for this family
+        const admins = await prisma.familyMember.findMany({
+            where: {
+                familyId,
+                role: { in: ['PRESIDENT', 'TREASURER'] }
+            },
+            select: { userId: true }
+        });
+
+        if (admins.length === 0) return;
+
+        const userIds = admins.map(a => a.userId);
+        const stripMarkdown = (s: string) => s.replace(/\*\*/g, '');
+
+        await sendBulkNotification(userIds, {
+            familyId,
+            ...NotificationTemplates.CRITICAL_AUDIT_ACTION(actorName, stripMarkdown(actionSummary)),
+            actionUrl: `/dashboard/${familyId}/settings?tab=audit`,
+        });
+    } catch (error) {
+        console.error('Failed to notify admins of critical action:', error);
+    }
+}
+
 
 /**
  * Get audit logs for a specific entity

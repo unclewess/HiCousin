@@ -184,7 +184,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ famil
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <AuditLogViewer familyId={familyId} />
+                            <AuditLogViewer familyId={familyId} userRole={currentUserRole as any} />
                         </CardContent>
                     </Card>
                 </TabsContent>

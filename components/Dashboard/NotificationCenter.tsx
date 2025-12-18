@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getMyNotifications, markAsRead } from "@/app/actions/notifications";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useVisibilityPolling } from "@/hooks/useVisibilityPolling";
 
 interface Notification {
     id: string;
@@ -16,28 +17,29 @@ interface Notification {
     createdAt: Date;
 }
 
-export function NotificationCenter() {
+export const NotificationCenter = React.memo(function NotificationCenter() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [open, setOpen] = useState(false);
 
-    useEffect(() => {
-        loadNotifications();
-        // Poll every minute
-        const interval = setInterval(loadNotifications, 60000);
-        return () => clearInterval(interval);
-    }, []);
-
-    async function loadNotifications() {
+    const loadNotifications = useCallback(async () => {
         const result = await getMyNotifications();
         if (result.success && result.data) {
-            // Cast the data to Notification[] since the server action returns a type that might be slightly different (e.g. dates as strings if not serialized properly, but here it's direct server action call so dates are preserved)
-            // Actually, server actions serialize dates to strings usually, but let's assume it works or we might need to map it.
-            // Looking at the component, it uses new Date(notification.createdAt), so it handles string dates.
             setNotifications(result.data as unknown as Notification[]);
             setUnreadCount(result.data.filter((n: any) => !n.isRead).length);
         }
-    }
+    }, []);
+
+    // Initial load
+    useEffect(() => {
+        loadNotifications();
+    }, [loadNotifications]);
+
+    // Visibility-aware polling - only polls when tab is visible
+    useVisibilityPolling(loadNotifications, {
+        interval: 60000,
+        fetchOnFocus: true,
+    });
 
     async function handleMarkRead(id: string) {
         await markAsRead(id);
@@ -89,4 +91,4 @@ export function NotificationCenter() {
             </PopoverContent>
         </Popover>
     );
-}
+});
