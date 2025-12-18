@@ -1,9 +1,19 @@
 'use client';
 
+import React, { useMemo } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Calendar, TrendingUp, TrendingDown, Award, Users } from 'lucide-react';
+
+// Constants moved outside components to prevent recreation on each render
+const PODIUM_HEIGHTS = ['h-32', 'h-40', 'h-24'] as const; // 2nd, 1st, 3rd
+const PODIUM_COLORS = [
+    'from-gray-300 to-gray-400', // Silver
+    'from-yellow-400 to-yellow-600', // Gold
+    'from-orange-400 to-orange-600', // Bronze
+] as const;
+const TROPHY_EMOJIS = ['🥈', '🥇', '🥉'] as const;
 
 interface LeaderboardPodiumProps {
     topThree: Array<{
@@ -15,23 +25,15 @@ interface LeaderboardPodiumProps {
     }>;
 }
 
-export function LeaderboardPodium({ topThree }: LeaderboardPodiumProps) {
+export const LeaderboardPodium = React.memo(function LeaderboardPodium({ topThree }: LeaderboardPodiumProps) {
     if (topThree.length === 0) return null;
 
     // Reorder for podium display: 2nd, 1st, 3rd
-    const podiumOrder = [
+    const podiumOrder = useMemo(() => [
         topThree[1], // 2nd place (left)
         topThree[0], // 1st place (center, tallest)
         topThree[2], // 3rd place (right)
-    ].filter(Boolean);
-
-    const podiumHeights = ['h-32', 'h-40', 'h-24']; // 2nd, 1st, 3rd
-    const podiumColors = [
-        'from-gray-300 to-gray-400', // Silver
-        'from-yellow-400 to-yellow-600', // Gold
-        'from-orange-400 to-orange-600', // Bronze
-    ];
-    const trophyEmojis = ['🥈', '🥇', '🥉'];
+    ].filter(Boolean), [topThree]);
 
     return (
         <div className="relative">
@@ -77,7 +79,7 @@ export function LeaderboardPodium({ topThree }: LeaderboardPodiumProps) {
                                 </div>
                                 {/* Trophy Badge */}
                                 <div className="absolute -top-2 -right-2 text-3xl animate-pulse">
-                                    {trophyEmojis[index]}
+                                    {TROPHY_EMOJIS[index]}
                                 </div>
                             </div>
 
@@ -93,8 +95,8 @@ export function LeaderboardPodium({ topThree }: LeaderboardPodiumProps) {
                             <div
                                 className={cn(
                                     "w-24 rounded-t-xl bg-gradient-to-b shadow-lg flex items-center justify-center",
-                                    podiumHeights[index],
-                                    podiumColors[index]
+                                    PODIUM_HEIGHTS[index],
+                                    PODIUM_COLORS[index]
                                 )}
                             >
                                 <span className="text-white text-4xl font-bold font-outfit">
@@ -107,7 +109,8 @@ export function LeaderboardPodium({ topThree }: LeaderboardPodiumProps) {
             </div>
         </div>
     );
-}
+});
+
 
 interface LeaderboardRowProps {
     member: {
@@ -120,7 +123,7 @@ interface LeaderboardRowProps {
     previousRank?: number;
 }
 
-export function LeaderboardRow({ member, previousRank }: LeaderboardRowProps) {
+export const LeaderboardRow = React.memo(function LeaderboardRow({ member, previousRank }: LeaderboardRowProps) {
     const rankChange = previousRank ? previousRank - member.rank : 0;
     const isTop3 = member.rank <= 3;
 
@@ -197,4 +200,4 @@ export function LeaderboardRow({ member, previousRank }: LeaderboardRowProps) {
             </div>
         </Card>
     );
-}
+});

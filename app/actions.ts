@@ -813,7 +813,7 @@ export async function getDashboardData(familyId: string) {
             }
         }
     });
-    const targetAmount = target ? Number(target.targetAmount) : 5000; // Default 5000
+    const targetAmount = target ? Number(target.targetAmount) : 0; // Default to 0 until user sets a target
 
     // Get all members and their contributions for this month
     const members = await prisma.familyMember.findMany({

@@ -1,9 +1,25 @@
 'use client';
 
+import React, { useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AnimatedNumber, AnimatedCurrency, AnimatedPercentage } from '@/components/ui/AnimatedNumber';
+
+// Move constant objects outside component to prevent recreation on each render
+const variantStyles = {
+    default: 'from-gray-50 to-gray-100',
+    gradient: 'from-cousin-purple/10 to-cousin-pink/10',
+    success: 'from-cousin-green/10 to-emerald-100',
+    warning: 'from-cousin-orange/10 to-amber-100',
+} as const;
+
+const iconBgStyles = {
+    default: 'bg-gray-200',
+    gradient: 'bg-gradient-to-br from-cousin-purple to-cousin-pink',
+    success: 'bg-gradient-to-br from-cousin-green to-emerald-500',
+    warning: 'bg-gradient-to-br from-cousin-orange to-amber-500',
+} as const;
 
 interface StatsCardProps {
     title: string;
@@ -18,20 +34,7 @@ interface StatsCardProps {
     valueType?: 'number' | 'currency' | 'percentage' | 'text';
 }
 
-export function StatsCard({ title, value, subtitle, icon, trend, variant = 'default', valueType = 'text' }: StatsCardProps) {
-    const variantStyles = {
-        default: 'from-gray-50 to-gray-100',
-        gradient: 'from-cousin-purple/10 to-cousin-pink/10',
-        success: 'from-cousin-green/10 to-emerald-100',
-        warning: 'from-cousin-orange/10 to-amber-100',
-    };
-
-    const iconBgStyles = {
-        default: 'bg-gray-200',
-        gradient: 'bg-gradient-to-br from-cousin-purple to-cousin-pink',
-        success: 'bg-gradient-to-br from-cousin-green to-emerald-500',
-        warning: 'bg-gradient-to-br from-cousin-orange to-amber-500',
-    };
+export const StatsCard = React.memo(function StatsCard({ title, value, subtitle, icon, trend, variant = 'default', valueType = 'text' }: StatsCardProps) {
 
     const getTrendIcon = () => {
         if (!trend) return null;
@@ -93,4 +96,4 @@ export function StatsCard({ title, value, subtitle, icon, trend, variant = 'defa
             </CardContent>
         </Card>
     );
-}
+});

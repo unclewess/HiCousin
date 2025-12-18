@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Bell, Check, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import {
@@ -17,6 +17,7 @@ import {
     removeNotification,
     getUnreadNotificationCount,
 } from '@/app/actions/notifications';
+import { useVisibilityPolling } from '@/hooks/useVisibilityPolling';
 
 interface Notification {
     id: string;
@@ -29,14 +30,14 @@ interface Notification {
     createdAt: Date;
 }
 
-export function NotificationCenter({ familyId }: { familyId?: string }) {
+export const NotificationCenter = React.memo(function NotificationCenter({ familyId }: { familyId?: string }) {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
     // Load notifications
-    const loadNotifications = async () => {
+    const loadNotifications = useCallback(async () => {
         setLoading(true);
         const result = await getMyNotifications({
             familyId,
@@ -47,27 +48,27 @@ export function NotificationCenter({ familyId }: { familyId?: string }) {
             setNotifications(result.data as any);
         }
         setLoading(false);
-    };
+    }, [familyId]);
 
     // Load unread count
-    const loadUnreadCount = async () => {
+    const loadUnreadCount = useCallback(async () => {
         const result = await getUnreadNotificationCount(familyId);
         if (result.success && result.data) {
             setUnreadCount(result.data.count);
         }
-    };
+    }, [familyId]);
 
+    // Initial load
     useEffect(() => {
         loadNotifications();
         loadUnreadCount();
+    }, [loadNotifications, loadUnreadCount]);
 
-        // Poll for new notifications every 30 seconds
-        const interval = setInterval(() => {
-            loadUnreadCount();
-        }, 30000);
-
-        return () => clearInterval(interval);
-    }, [familyId]);
+    // Visibility-aware polling - only polls when tab is visible
+    useVisibilityPolling(loadUnreadCount, {
+        interval: 30000,
+        fetchOnFocus: true,
+    });
 
     const handleMarkAsRead = async (notificationId: string) => {
         await markAsRead(notificationId);
@@ -204,4 +205,4 @@ export function NotificationCenter({ familyId }: { familyId?: string }) {
             </DropdownMenuContent>
         </DropdownMenu>
     );
-}
+});

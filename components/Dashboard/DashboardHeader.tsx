@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useMemo } from 'react';
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/Button";
@@ -11,7 +12,7 @@ import { NotificationCenter } from "@/components/Notifications/NotificationCente
 import { Tooltip } from "@/components/ui/Tooltip";
 
 
-export function DashboardHeader() {
+export const DashboardHeader = React.memo(function DashboardHeader() {
     const params = useParams();
     const familyId = params?.familyId as string | undefined;
     const [familyName, setFamilyName] = useState<string | null>(null);
@@ -23,6 +24,9 @@ export function DashboardHeader() {
             setFamilyName(null);
         }
     }, [familyId]);
+
+    // Memoize familyId to prevent unnecessary NotificationCenter re-renders
+    const memoizedFamilyId = useMemo(() => familyId, [familyId]);
 
     return (
         <>
@@ -60,7 +64,7 @@ export function DashboardHeader() {
                                     Switch Family
                                 </Button>
                             </Link>
-                            <NotificationCenter familyId={familyId} />
+                            <NotificationCenter familyId={memoizedFamilyId} />
                             <UserButton showName />
                         </div>
                     </div>
@@ -98,11 +102,11 @@ export function DashboardHeader() {
                                 <Home size={18} />
                             </Button>
                         </Link>
-                        <NotificationCenter familyId={familyId} />
+                        <NotificationCenter familyId={memoizedFamilyId} />
                         <UserButton />
                     </div>
                 </div>
             </nav>
         </>
     );
-}
+});

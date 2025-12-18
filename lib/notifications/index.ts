@@ -239,4 +239,11 @@ export const NotificationTemplates = {
         message: `Your monthly contribution of KES ${amount} is due by ${deadline}`,
         priority: 'HIGH' as const,
     }),
+
+    CRITICAL_AUDIT_ACTION: (actorName: string, actionSummary: string) => ({
+        type: 'CRITICAL_AUDIT_ACTION',
+        title: '⚠️ Critical Action Performed',
+        message: `${actorName} performed a critical action: ${actionSummary}`,
+        priority: 'URGENT' as const,
+    }),
 };
